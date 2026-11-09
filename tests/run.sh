@@ -23,8 +23,10 @@ if sh "$BIN" syncplay not-a-url >/dev/null 2>&1; then echo "Expected invalid Syn
 [ "$(aw_hianime_validate_episode_id 123 2>/dev/null; printf ok)" = "ok" ]
 if (aw_hianime_validate_episode_id nope) >/dev/null 2>&1; then echo "Expected invalid episode ID to fail" >&2; exit 1; fi
 if (aw_hianime_validate_slug 'bad/slug') >/dev/null 2>&1; then echo "Expected invalid anime slug to fail" >&2; exit 1; fi
-sample='<div class="ep-item" data-number="1" data-id="98765"><a href="/watch/demo-123?ep=98765"></a></div>'
-[ "$(printf '%s' "$sample" | sed 's|ep-item|\nep-item|g' | sed -nE 's|.*data-number="([^"]*)".*data-id="([0-9]+)".*|\2\t\1|p')" = "$(printf '98765\t1')" ]
+sample='<div class="ep-item" data-id="98765" data-number="1"><a href="/watch/demo-123?ep=98765"></a></div>'
+[ "$(aw_hianime_parse_episodes "$sample")" = "$(printf '98765\t1')" ]
+servers='<div class="server-item" data-id="22" data-server-name="Example" data-type="sub"></div>'
+[ "$(aw_hianime_parse_servers "$servers")" = "$(printf 'sub\tExample\t22')" ]
 tmpdir=$(mktemp -d)
 ANIWATCH_STATE_DIR=$tmpdir/state
 ANIWATCH_HISTORY=$ANIWATCH_STATE_DIR/history.tsv
