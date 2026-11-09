@@ -9,7 +9,10 @@ AniWatch is a modular POSIX-shell anime discovery and playback CLI. It combines 
 - Search anime metadata through Jikan.
 - Search HiAnime titles and list episodes and server labels.
 - Browse popular, random and seasonal anime through Jikan.
-- Play supported media URLs using MPV and yt-dlp.
+- Play supported media URLs using MPV or VLC; MPV remains the default.
+- Navigate to the next or previous episode from the interactive player flow.
+- Download numeric episode ranges in bulk when a server exposes direct accessible stream URLs.
+- Optionally integrate the external `ani-skip` command with MPV for opening/ending skips.
 - Inspect accessible HLS master playlists, select best/worst or capped resolution, and pass a required HTTP Referer to MPV/yt-dlp.
 - Prefer Japanese audio (`sub`) or English audio (`dub`) when the source exposes language metadata.
 - Select best, worst, 360p, 480p, 720p or 1080p formats when available.
@@ -23,7 +26,7 @@ AniWatch is a modular POSIX-shell anime discovery and playback CLI. It combines 
 - POSIX-compatible shell
 - `curl` and `jq`
 - `fzf` for interactive HiAnime title selection
-- `yt-dlp` and `mpv` for playback and downloads
+- `yt-dlp` and either `mpv` or `vlc` for playback; MPV is required for Ani-Skip
 - `syncplay` for synchronized sessions
 
 Install dependencies using your platform's package manager. On Termux, package availability varies by repository; install compatible builds of yt-dlp and MPV.
@@ -63,6 +66,9 @@ aniwatch watch "https://example.com/watch/episode" 1080p sub
 aniwatch watch "https://example.com/watch/episode" 720p dub
 aniwatch download "https://example.com/watch/episode" 1080p sub
 
+# Download a range of episodes (direct accessible server URLs only)
+aniwatch bulk-download "frieren" 1-12 sub 720p
+
 # Play an accessible HLS master playlist, optionally with a provider Referer
 aniwatch hls "https://cdn.example.com/master.m3u8" 720p "https://provider.example/" "Anime Episode 1"
 
@@ -78,7 +84,7 @@ aniwatch continue
 aniwatch history-clear
 ```
 
-The HLS resolver supports accessible master playlists and relative variant URLs. It does not resolve HiAnime server IDs into protected or obfuscated embed streams. The HiAnime search command prints a slug and title. Pass that slug to `episodes`; pass an episode ID from that output to `servers`. The server command displays the available server labels and type only. It does not resolve embedded players into direct stream URLs.
+The HLS resolver supports accessible master playlists and relative variant URLs. It does not resolve HiAnime server IDs into protected or obfuscated embed streams. The HiAnime search command prints a slug and title. Pass that slug to `episodes`; pass an episode ID from that output to `servers`. The server command displays server labels and any direct stream URL exposed in the response. It does not resolve opaque server IDs into protected embed streams. Interactive mode supports next/previous episode navigation after playback returns. Bulk download skips episodes without a direct accessible URL.
 
 ### Audio and quality behavior
 
@@ -89,7 +95,7 @@ The HLS resolver supports accessible master playlists and relative variant URLs.
 
 ### Watch history
 
-History is stored locally at `$XDG_STATE_HOME/aniwatch/history.tsv`. If `XDG_STATE_HOME` is unset, AniWatch uses `~/.local/state/aniwatch/`. New entries include anime ID and episode number; legacy three-column entries remain readable. Override the location with `ANIWATCH_STATE_DIR`. History is not uploaded.
+History is stored locally at `$XDG_STATE_HOME/aniwatch/history.tsv`. If `XDG_STATE_HOME` is unset, AniWatch uses `~/.local/state/aniwatch/`. New entries include anime ID and episode number; legacy three-column entries remain readable. Override the location with `ANIWATCH_STATE_DIR`. History is not uploaded.\n\n### Player integrations\n\nSet `ANIWATCH_PLAYER=mpv` (default) or `ANIWATCH_PLAYER=vlc` to choose the player. VLC does not support the Ani-Skip MPV Lua integration. Install the separate [`ani-skip`](https://github.com/synacktraa/ani-skip) command and set `ANIWATCH_SKIP_INTRO=1` to enable opening/ending skip metadata during MPV playback. AniWatch resolves a MyAnimeList ID from Jikan metadata and calls `ani-skip -i MAL_ID -e EPISODE`; missing metadata or skip data simply leaves playback unchanged. Ani-Skip is optional and is not bundled.
 
 ## Configuration
 
@@ -123,12 +129,12 @@ AniWatch is an independent implementation inspired by the terminal workflow of [
 | Anime search | HiAnime HTML search | HiAnime HTML search + Jikan |
 | Episode list | HiAnime episode endpoint | HiAnime episode endpoint |
 | Server list | HiAnime server endpoint + provider resolver | HiAnime server labels only |
-| Direct stream resolution | Provider-specific embed resolver | Generic accessible HLS manifest resolver; no provider embed decryption |
+| Direct stream resolution | Provider-specific embed resolver | Generic accessible HLS manifest resolver; no protected embed decryption |
 | Sub/dub | Provider server selection | Audio-language preference for supplied URLs; provider selection pending |
 | Quality | Provider/HLS selection | HLS variant selection + yt-dlp format selection |
-| Downloads | yt-dlp / ffmpeg fallback | yt-dlp for supported URLs and HLS variants |
+| Downloads | yt-dlp / ffmpeg fallback | yt-dlp / ffmpeg for direct accessible URLs; numeric range workflow |
 | Watch history | Episode-aware | Episode-aware for interactive direct-stream playback; legacy URL history supported |
-| Syncplay | Yes | Syncplay client integration |
+| Syncplay | Yes | Syncplay client integration |\n| VLC | Yes | Optional player backend |\n| Ani-Skip | Optional MPV integration | Optional external ani-skip command integration |
 
 ## License
 
