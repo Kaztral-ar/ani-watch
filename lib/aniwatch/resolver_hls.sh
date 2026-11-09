@@ -25,9 +25,9 @@ aw_hls_variants() {
     aw_validate_url "$aw_hls_manifest"
     aw_require curl
     if [ -n "$aw_hls_referer" ]; then
-        aw_hls_playlist=$(curl --fail --silent --show-error --location --max-time 30 -H "Referer: $aw_hls_referer" "$aw_hls_manifest") || return 1
+        aw_hls_playlist=$(curl --fail --silent --show-error --location --connect-timeout 10 --max-time 30 --retry 3 -H "Referer: $aw_hls_referer" "$aw_hls_manifest") || return 1
     else
-        aw_hls_playlist=$(curl --fail --silent --show-error --location --max-time 30 "$aw_hls_manifest") || return 1
+        aw_hls_playlist=$(curl --fail --silent --show-error --location --connect-timeout 10 --max-time 30 --retry 3 "$aw_hls_manifest") || return 1
     fi
     printf '%s\n' "$aw_hls_playlist" | awk '
         /^#EXT-X-STREAM-INF:/ {
