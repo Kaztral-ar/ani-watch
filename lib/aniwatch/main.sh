@@ -52,7 +52,7 @@ aw_hianime_servers_command() {
 }
 aw_interactive() {
     aw_check_deps
-    command -v fzf >/dev/null 2>&1 || aw_die "interactive mode requires fzf; run 'aniwatch search QUERY' instead"
+    command -v fzf >/dev/null 2>&1 || aw_die "interactive mode requires fzf; install it or use 'aniwatch search QUERY'"
     aw_header
     printf 'Search HiAnime: '
     IFS= read -r aw_query || exit 0
@@ -62,7 +62,23 @@ aw_interactive() {
     aw_choice=$(printf '%s\n' "$aw_data" | fzf --with-nth=2 --delimiter="$(printf '\t')" --prompt='Select anime> ') || return 1
     aw_slug=$(printf '%s\n' "$aw_choice" | cut -f 1)
     aw_title=$(printf '%s\n' "$aw_choice" | cut -f 2)
-    printf 'Selected: %s\nAnime ID: %s\nNext: aniwatch episodes %s\n' "$aw_title" "$aw_slug" "$aw_slug"
+    aw_data=$(aw_hianime_episodes "$aw_slug") || aw_die "could not retrieve episodes"
+    [ -n "$aw_data" ] || aw_die "no episodes found"
+    aw_episode=$(printf '%s\n' "$aw_data" | fzf --with-nth=2 --delimiter="$(printf '\t')" --prompt='Select episode> ') || return 1
+    aw_episode_id=$(printf '%s\n' "$aw_episode" | cut -f 1)
+    aw_episode_no=$(printf '%s\n' "$aw_episode" | cut -f 2)
+    aw_data=$(aw_hianime_servers "$aw_episode_id") || aw_die "could not retrieve servers"
+    [ -n "$aw_data" ] || aw_die "no servers found"
+    aw_server=$(printf '%s\n' "$aw_data" | fzf --with-nth=1,2 --delimiter="$(printf '\t')" --prompt='Select sub/dub server> ') || return 1
+    aw_mode=$(printf '%s\n' "$aw_server" | cut -f 1)
+    aw_server_name=$(printf '%s\n' "$aw_server" | cut -f 2)
+    aw_stream=$(printf '%s\n' "$aw_server" | cut -f 4)
+    [ -n "$aw_stream" ] || aw_die "selected server ($aw_server_name) exposes no direct stream URL; AniWatch will not decode protected embeds or bypass access controls"
+    aw_media_title="$aw_title Episode $aw_episode_no"
+    case "$aw_stream" in
+        *.m3u8*|*.m3u*) aw_play_hls "$aw_stream" "$ANIWATCH_QUALITY" "$ANIWATCH_HIANIME_BASE" "$aw_media_title" ;;
+        *) aw_play_url "$aw_stream" "$ANIWATCH_QUALITY" "$aw_mode" ;;
+    esac
 }
 aw_hls_command() {
     [ "$#" -ge 1 ] || aw_die "hls requires a manifest URL"
