@@ -1,4 +1,4 @@
-const API = "https://api.jikan.moe/v4";
+const API = "https://api.tenrai.org/v1";
 const params = new URLSearchParams(location.search);
 const id = params.get("id");
 const statusBox = document.querySelector("#detail-status");
