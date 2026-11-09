@@ -91,10 +91,18 @@ aw_play_url() {
                     *) aw_play_noglob=0; set -f ;;
                 esac
                 if [ -n "$aw_play_referer" ]; then
-                    mpv $aw_play_skip_flags --referrer="$aw_play_referer" --force-media-title="$aw_play_title" --ytdl-format="$aw_play_format" --alang="$aw_play_audio" --slang="en,eng" -- "$aw_play_url_value"
+                    # shellcheck disable=SC2086
+                    mpv 
+                    # shellcheck disable=SC2086
+                    mpv $aw_
+ --referrer="$aw_play_referer" --force-media-title="$aw_play_title" --ytdl-format="$aw_play_format" --alang="$aw_play_audio" --slang="en,eng" -- "$aw_play_url_value"
                     aw_play_status=$?
                 else
-                    mpv $aw_play_skip_flags --force-media-title="$aw_play_title" --ytdl-format="$aw_play_format" --alang="$aw_play_audio" --slang="en,eng" -- "$aw_play_url_value"
+                    # shellcheck disable=SC2086
+                    mpv 
+                    # shellcheck disable=SC2086
+                    mpv $aw_
+ --force-media-title="$aw_play_title" --ytdl-format="$aw_play_format" --alang="$aw_play_audio" --slang="en,eng" -- "$aw_play_url_value"
                     aw_play_status=$?
                 fi
                 [ "$aw_play_noglob" -eq 1 ] || set +f
