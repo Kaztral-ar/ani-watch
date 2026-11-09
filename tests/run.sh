@@ -28,7 +28,9 @@ if (aw_hianime_validate_slug 'bad/slug') >/dev/null 2>&1; then echo "Expected in
 sample='<div class="ep-item" data-id="98765" data-number="1"><a href="/watch/demo-123?ep=98765"></a></div>'
 [ "$(aw_hianime_parse_episodes "$sample")" = "$(printf '98765\t1')" ]
 servers='<div class="server-item" data-id="22" data-server-name="Example" data-type="sub"></div>'
-[ "$(aw_hianime_parse_servers "$servers")" = "$(printf 'sub\tExample\t22')" ]
+[ "$(aw_hianime_parse_servers "$servers")" = "$(printf 'sub\tExample\t22\t')" ]
+linked_server='<div class="server-item" data-type="dub" data-server-name="Public" data-id="23" data-link="https://cdn.example.test/master.m3u8"></div>'
+[ "$(aw_hianime_parse_servers "$linked_server")" = "$(printf 'dub\tPublic\t23\thttps://cdn.example.test/master.m3u8')" ]
 [ "$(aw_hls_resolve_uri "https://cdn.example.test/path/master.m3u8" "720/index.m3u8")" = "https://cdn.example.test/path/720/index.m3u8" ]
 [ "$(aw_hls_resolve_uri "https://cdn.example.test/path/master.m3u8" "/hls/720.m3u8")" = "https://cdn.example.test/hls/720.m3u8" ]
 [ "$(aw_hls_resolve_uri "https://cdn.example.test/path/master.m3u8" "//media.example.test/v/720.m3u8")" = "https://media.example.test/v/720.m3u8" ]
