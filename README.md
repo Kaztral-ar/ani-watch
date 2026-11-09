@@ -100,7 +100,6 @@ Syncplay synchronizes player state, not video files or provider access. Every pa
 | `ANIWATCH_DOWNLOAD_DIR` | `.` | Download destination |
 | `ANIWATCH_STATE_DIR` | `~/.local/state/aniwatch` | Local state directory |
 | `ANIWATCH_SYNCPLAY_SERVER` | `syncplay.pl:8995` | Syncplay server |
-| `ANIWATCH_PLAYER` | `mpv` | Reserved player preference |
 
 ## Development
 
