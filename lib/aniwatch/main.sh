@@ -95,8 +95,8 @@ aw_interactive() {
         printf '[n] next  [p] previous  [s] select episode  [q] quit: '
         IFS= read -r aw_nav || break
         case "$aw_nav" in
-            n|N) [ "$aw_index" -lt "$aw_total" ] || { aw_info "Already at the last listed episode"; continue; }; aw_index=$((aw_index + 1)); aw_episode=$(printf '%s\n' "$aw_episode_rows" | sed -n "${aw_index}p") ;;
-            p|P) [ "$aw_index" -gt 1 ] || { aw_info "Already at the first listed episode"; continue; }; aw_index=$((aw_index - 1)); aw_episode=$(printf '%s\n' "$aw_episode_rows" | sed -n "${aw_index}p") ;;
+            n|N) [ "$aw_index" -lt "$aw_total" ] || { aw_info "Already at the last listed episode"; aw_episode=$(printf '%s\n' "$aw_episode_rows" | fzf --with-nth=2 --delimiter="$(printf '\t')" --prompt='Select episode> ') || break; aw_index=$(printf '%s\n' "$aw_episode_rows" | awk -F '\t' -v id="$(printf '%s\n' "$aw_episode" | cut -f 1)" '$1==id {print NR; exit}'); continue; }; aw_index=$((aw_index + 1)); aw_episode=$(printf '%s\n' "$aw_episode_rows" | sed -n "${aw_index}p") ;;
+            p|P) [ "$aw_index" -gt 1 ] || { aw_info "Already at the first listed episode"; aw_episode=$(printf '%s\n' "$aw_episode_rows" | fzf --with-nth=2 --delimiter="$(printf '\t')" --prompt='Select episode> ') || break; aw_index=$(printf '%s\n' "$aw_episode_rows" | awk -F '\t' -v id="$(printf '%s\n' "$aw_episode" | cut -f 1)" '$1==id {print NR; exit}'); continue; }; aw_index=$((aw_index - 1)); aw_episode=$(printf '%s\n' "$aw_episode_rows" | sed -n "${aw_index}p") ;;
             s|S) aw_episode=$(printf '%s\n' "$aw_episode_rows" | fzf --with-nth=2 --delimiter="$(printf '\t')" --prompt='Select episode> ') || break; aw_index=$(printf '%s\n' "$aw_episode_rows" | awk -F '\t' -v id="$(printf '%s\n' "$aw_episode" | cut -f 1)" '$1==id {print NR; exit}') ;;
             *) break ;;
         esac
@@ -115,6 +115,7 @@ aw_download_range_command() {
     case "$aw_start:$aw_end" in *[!0-9:]*|:*|*:) aw_die "episode range must be numeric, for example 1-12" ;; esac
     [ "$aw_start" -gt 0 ] && [ "$aw_end" -ge "$aw_start" ] || aw_die "invalid episode range"
     case "$aw_mode" in sub|dub) ;; *) aw_die "mode must be sub or dub" ;; esac
+    aw_quality_format "$aw_quality" "$aw_mode" >/dev/null
     aw_check_deps
     aw_episode_rows=$(aw_hianime_episodes "$aw_slug") || aw_die "could not retrieve episodes"
     aw_selected=$(printf '%s\n' "$aw_episode_rows" | awk -F '\t' -v s="$aw_start" -v e="$aw_end" '$2 ~ /^[0-9]+$/ && $2+0 >= s && $2+0 <= e {print}')
@@ -134,7 +135,7 @@ aw_download_range_command() {
         aw_info "Downloading episode $aw_ep_no"
         case "$aw_stream" in
             *.m3u8*|*.m3u*) aw_download_hls "$aw_stream" "$aw_quality" "$ANIWATCH_HIANIME_BASE" "$aw_title" ;;
-            *) aw_require yt-dlp; yt-dlp --no-playlist --referer "$ANIWATCH_HIANIME_BASE" --format "best[height<=${aw_quality%p}]/best" --write-subs --write-auto-subs --sub-langs "en,eng" --embed-subs --output "$ANIWATCH_DOWNLOAD_DIR/%(title).180B [%(id)s].%(ext)s" "$aw_stream" ;;
+            *) aw_require yt-dlp; aw_format=$(aw_quality_format "$aw_quality" "$aw_mode"); yt-dlp --no-playlist --referer "$ANIWATCH_HIANIME_BASE" --format "$aw_format" --write-subs --write-auto-subs --sub-langs "en,eng" --embed-subs --output "$ANIWATCH_DOWNLOAD_DIR/%(title).180B [%(id)s].%(ext)s" "$aw_stream" ;;
         esac || aw_info "Download failed for episode $aw_ep_no"
         aw_downloaded=$((aw_downloaded + 1))
     done <<EOF
