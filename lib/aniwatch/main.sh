@@ -76,7 +76,7 @@ aw_interactive() {
     [ -n "$aw_stream" ] || aw_die "selected server ($aw_server_name) exposes no direct stream URL; AniWatch will not decode protected embeds or bypass access controls"
     aw_media_title="$aw_title Episode $aw_episode_no"
     case "$aw_stream" in
-        *.m3u8*|*.m3u*) aw_play_hls "$aw_stream" "$ANIWATCH_QUALITY" "$ANIWATCH_HIANIME_BASE" "$aw_media_title" ;;
+        *.m3u8*|*.m3u*) aw_play_hls "$aw_stream" "$ANIWATCH_QUALITY" "$ANIWATCH_HIANIME_BASE" "$aw_media_title" "$aw_slug" "$aw_episode_no" ;;
         *) aw_play_url "$aw_stream" "$ANIWATCH_QUALITY" "$aw_mode" ;;
     esac
 }
