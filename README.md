@@ -1,52 +1,85 @@
 <div align="center">
 
-# AniWatch
+<img src="assets/aniwatch-banner.svg" alt="AniWatch — Your anime toolkit, right in the terminal" width="100%">
 
-### Anime discovery. Episode browsing. Terminal playback.
+<br>
 
-A lightweight, modular anime CLI for **POSIX-compatible shells**.
+[![CI](https://img.shields.io/github/actions/workflow/status/Kaztral-ar/ani-watch/ci.yml?branch=main&style=for-the-badge&logo=githubactions&logoColor=white&label=CI)](https://github.com/Kaztral-ar/ani-watch/actions/workflows/ci.yml)
+[![License](https://img.shields.io/github/license/Kaztral-ar/ani-watch?style=for-the-badge&label=license)](LICENSE)
+[![Stars](https://img.shields.io/github/stars/Kaztral-ar/ani-watch?style=for-the-badge&logo=github)](https://github.com/Kaztral-ar/ani-watch/stargazers)
+[![Issues](https://img.shields.io/github/issues/Kaztral-ar/ani-watch?style=for-the-badge)](https://github.com/Kaztral-ar/ani-watch/issues)
 
-[![CI](https://github.com/Kaztral-ar/ani-watch/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Kaztral-ar/ani-watch/actions/workflows/ci.yml)
-[![License](https://img.shields.io/github/license/Kaztral-ar/ani-watch?style=flat-square)](LICENSE)
-[![Shell](https://img.shields.io/badge/shell-POSIX%20sh-89e051?style=flat-square)](#)
-[![Platform](https://img.shields.io/badge/platform-Termux%20%7C%20Linux%20%7C%20macOS-informational?style=flat-square)](#)
+**A lightweight anime discovery and playback CLI built for your terminal.**
 
-**Search** · **Browse** · **Watch** · **Download**
-
-[Getting Started](#-getting-started) · [Commands](#-command-reference) · [Configuration](#-configuration) · [Limitations](#-important-notes)
+[Get Started](#-quick-start) · [Features](#-features) · [Commands](#-command-center) · [Configuration](#-configuration) · [Contributing](#-contributing)
 
 </div>
 
 ---
 
-## ✨ What is AniWatch?
+## ✦ About AniWatch
 
-AniWatch brings anime discovery and supported media playback into your terminal. Search titles through HiAnime, explore episode and server listings, discover anime metadata through Jikan, and play or download media URLs that your local tools can access.
+**AniWatch** brings anime discovery, episode browsing, metadata lookup, and supported media playback into one command-line workflow.
 
-It is designed to stay small, scriptable, and friendly to Termux, Linux, and macOS.
+Search titles through HiAnime, explore episodes, discover anime information with Jikan, then play or download media that your local tools can access.
 
-## 🚀 Features
+> Built for people who prefer a fast terminal workflow — including Android users running Termux.
 
-| Area | Capabilities |
-|---|---|
-| Discovery | HiAnime title search, episode listings, server labels |
-| Metadata | Jikan search, popular titles, random anime, seasonal listings, anime details |
-| Interactive UI | Guided selection with `fzf`, episode navigation |
-| Playback | MPV or VLC for supported direct media URLs |
-| Downloads | `yt-dlp` downloads and accessible HLS playlists |
-| Quality | `best`, `worst`, `360p`, `480p`, `720p`, `1080p` |
-| Audio preference | Japanese (`sub`) or English (`dub`) preference where available |
-| Watch history | History list, continue last URL, clear history |
-| Extras | Syncplay and optional MPV Ani-Skip integration |
+## ⚡ Features
 
-## 📦 Getting started
+<table>
+<tr>
+<td width="50%" valign="top">
 
-### 1. Install dependencies
+### 🔎 Discover
+- Search anime titles
+- Browse episode listings
+- View available server labels
+- Explore popular and seasonal anime
+- Look up detailed anime metadata
 
-Choose the command for your environment.
+</td>
+<td width="50%" valign="top">
 
-<details>
-<summary><strong>Android · Termux</strong></summary>
+### ▶️ Watch
+- Interactive terminal navigation
+- MPV or VLC playback
+- Accessible HLS playlist support
+- Japanese / English audio preference
+- Selectable video quality
+
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+
+### 📥 Download
+- Direct media downloads
+- HLS download and remux
+- Episode range downloads
+- Subtitle download support
+- Configurable download directory
+
+</td>
+<td width="50%" valign="top">
+
+### 🧰 Make it yours
+- Watch history and resume
+- fzf-powered selection
+- Syncplay support
+- Optional Ani-Skip integration
+- POSIX shell implementation
+
+</td>
+</tr>
+</table>
+
+## 🚀 Quick start
+
+### 1 · Install dependencies
+
+<details open>
+<summary><b>Android — Termux</b></summary>
 
 ```sh
 pkg update
@@ -56,7 +89,7 @@ pkg install git make curl jq fzf yt-dlp mpv
 </details>
 
 <details>
-<summary><strong>Ubuntu · Debian</strong></summary>
+<summary><b>Linux — Ubuntu / Debian</b></summary>
 
 ```sh
 sudo apt update
@@ -66,7 +99,7 @@ sudo apt install git make curl jq fzf yt-dlp mpv
 </details>
 
 <details>
-<summary><strong>macOS · Homebrew</strong></summary>
+<summary><b>macOS — Homebrew</b></summary>
 
 ```sh
 brew install git make curl jq fzf yt-dlp mpv
@@ -74,14 +107,7 @@ brew install git make curl jq fzf yt-dlp mpv
 
 </details>
 
-**Optional tools**
-
-- `ffmpeg` — HLS fallback/remux and subtitle embedding.
-- `vlc` — alternative media player.
-- `syncplay` — synchronized viewing.
-- `ani-skip` — intro/outro skipping with MPV.
-
-### 2. Install AniWatch
+### 2 · Clone and install
 
 ```sh
 git clone https://github.com/Kaztral-ar/ani-watch.git
@@ -89,54 +115,52 @@ cd ani-watch
 make install PREFIX="$HOME/.local"
 ```
 
-Ensure `$HOME/.local/bin` is included in your `PATH`, then launch:
+Make sure `$HOME/.local/bin` is in your `PATH`.
+
+### 3 · Launch
 
 ```sh
 aniwatch
 ```
 
-For a system-wide installation, use `sudo make install` (default prefix: `/usr/local`).
-
 <details>
-<summary><strong>Run directly without installing</strong></summary>
+<summary><b>Prefer not to install?</b></summary>
+
+Run directly from the cloned repository:
 
 ```sh
-git clone https://github.com/Kaztral-ar/ani-watch.git
-cd ani-watch
 ./bin/aniwatch
 ```
 
 </details>
 
-<details>
-<summary><strong>Uninstall</strong></summary>
+### Optional dependencies
 
-Use the same prefix that you used during installation:
+| Tool | Purpose |
+|---|---|
+| `ffmpeg` | HLS fallback/remux and subtitle embedding |
+| `vlc` | Alternative media player |
+| `syncplay` | Synchronized viewing |
+| `ani-skip` | Intro/outro skipping with MPV |
 
-```sh
-make uninstall PREFIX="$HOME/.local"
-```
+## 🎮 Command center
 
-</details>
+Run `aniwatch help` to see the complete built-in help.
 
-## ⌨️ Command reference
-
-Run `aniwatch help` at any time for the built-in help.
-
-### Discovery
+### Discover anime
 
 ```sh
-# Open interactive mode
+# Interactive mode
 aniwatch
 
-# Search HiAnime
+# Search titles on HiAnime
 aniwatch search "Frieren"
 
-# List episodes and server labels
+# Browse episodes and server labels
 aniwatch episodes <anime-id-or-slug>
 aniwatch servers <episode-id>
 
-# Discover anime metadata through Jikan
+# Explore Jikan metadata
 aniwatch metadata-search "Frieren"
 aniwatch top
 aniwatch random
@@ -145,7 +169,7 @@ aniwatch season 2026 fall
 aniwatch info <mal-id>
 ```
 
-### Playback and downloads
+### Play and download
 
 ```sh
 # Play a supported media URL
@@ -154,17 +178,19 @@ aniwatch watch "<media-url>" 1080p sub
 # Download a supported media URL
 aniwatch download "<media-url>" 720p dub
 
-# Play or download an accessible HLS playlist
+# Play / download an accessible HLS playlist
 aniwatch hls "<playlist.m3u8>" 720p
 aniwatch hls-download "<playlist.m3u8>" best
 
-# Download a numbered episode range
+# Download episodes 1 through 12
 aniwatch bulk-download <anime-slug> 1-12 sub 720p
 ```
 
-Quality and audio preference are optional where noted by the command help. A server listing is not itself a playable stream: playback requires a direct URL accessible to MPV, VLC, or `yt-dlp`.
+**Quality options:** `best`, `worst`, `360p`, `480p`, `720p`, `1080p`
 
-### History and synchronized viewing
+**Audio preference:** `sub` (Japanese) or `dub` (English), where the source provides the requested option.
+
+### History and watch together
 
 ```sh
 aniwatch history
@@ -175,82 +201,95 @@ aniwatch syncplay "<media-url>"
 
 ## ⚙️ Configuration
 
-Set environment variables before launching AniWatch. Values shown are the defaults.
+All settings can be supplied as environment variables.
 
 | Variable | Default | Description |
 |---|---|---|
-| `ANIWATCH_PLAYER` | `mpv` | Player: `mpv` or `vlc` |
-| `ANIWATCH_QUALITY` | `best` | Default quality preference |
-| `ANIWATCH_MODE` | `sub` | Audio preference: `sub` or `dub` |
-| `ANIWATCH_SKIP_INTRO` | `0` | Set to `1` to enable Ani-Skip with MPV |
+| `ANIWATCH_PLAYER` | `mpv` | Playback program: `mpv` or `vlc` |
+| `ANIWATCH_QUALITY` | `best` | Default quality |
+| `ANIWATCH_MODE` | `sub` | Default audio preference |
+| `ANIWATCH_SKIP_INTRO` | `0` | Set to `1` for MPV Ani-Skip integration |
 | `ANIWATCH_DOWNLOAD_DIR` | `.` | Download destination |
-| `ANIWATCH_STATE_DIR` | `~/.local/state/aniwatch` | Watch history and state |
+| `ANIWATCH_STATE_DIR` | `~/.local/state/aniwatch` | History and state directory |
 | `ANIWATCH_HIANIME_BASE` | `https://hianime.at` | HiAnime base URL |
 | `ANIWATCH_API_URL` | `https://api.jikan.moe/v4` | Jikan API base URL |
 | `ANIWATCH_SYNCPLAY_SERVER` | `syncplay.pl:8995` | Syncplay server |
 
-**Examples**
+<details>
+<summary><b>Configuration examples</b></summary>
 
 ```sh
-# Use VLC
+# Switch to VLC
 ANIWATCH_PLAYER=vlc aniwatch
 
-# Set default quality and audio preference
+# Set default quality and audio mode
 ANIWATCH_QUALITY=720p ANIWATCH_MODE=dub aniwatch
 
-# Enable intro/outro skipping
+# Enable Ani-Skip (MPV only)
 ANIWATCH_SKIP_INTRO=1 aniwatch
 
-# Save downloads to a dedicated folder
+# Change download folder
 ANIWATCH_DOWNLOAD_DIR="$HOME/Videos/Anime" aniwatch
 ```
 
-## 🧩 How it works
+</details>
 
-- **HiAnime** is used for title search, episode listings, and server labels.
-- **Jikan** provides anime metadata and seasonal discovery.
-- **fzf** powers interactive selection.
-- **MPV / VLC** handle playback of supported media URLs.
-- **yt-dlp / ffmpeg** handle supported downloads and HLS processing.
+## 🧱 Under the hood
 
-## ⚠️ Important notes
+| Component | Role |
+|---|---|
+| POSIX `sh` | Main application and shell portability |
+| HiAnime | Title search, episode data, server listings |
+| Jikan API | Anime metadata and seasonal discovery |
+| `fzf` | Interactive terminal selection |
+| `yt-dlp` | Supported stream extraction and downloads |
+| MPV / VLC | Media playback |
+| `ffmpeg` | HLS processing and subtitle embedding |
 
-- Playback and downloads work only when a direct media URL or HLS playlist is accessible to the installed player or downloader.
-- A server shown by the provider may expose only an opaque embed identifier, not a playable URL.
-- AniWatch does **not** decrypt protected embeds, bypass DRM, defeat access controls, or circumvent provider protections.
-- HiAnime is an unofficial provider integration. Its pages and endpoints may change or become unavailable without notice.
-- Use the software and media sources responsibly and in accordance with applicable laws and provider terms.
+## ⚠️ Important limitations
 
-## 🛠️ Development
+- Playback requires a direct media URL or HLS playlist accessible to the installed player or downloader.
+- A provider server listing does **not** guarantee that a playable media URL is available.
+- Opaque embed identifiers and protected stream sources are not resolved.
+- AniWatch does not bypass DRM, decrypt protected embeds, or circumvent access controls.
+- HiAnime is an unofficial provider integration. Its pages and endpoints may change or stop working.
+- Use the software and media sources in accordance with applicable laws and provider terms.
 
-Clone the repository and run the checks:
+## 🧪 Development
 
 ```sh
 git clone https://github.com/Kaztral-ar/ani-watch.git
 cd ani-watch
 
+# Run regression tests
 make test
+
+# Build the standalone executable
 make build
 ```
 
-The CI workflow checks POSIX shell syntax, ShellCheck, regression tests under `sh`, `dash`, and BusyBox `ash`, and the standalone build.
+CI checks shell syntax, ShellCheck, tests under `sh`, `dash`, and BusyBox `ash`, and the standalone build.
 
 ## 🤝 Contributing
 
-Bug reports and focused pull requests are welcome.
+Contributions, bug reports, and practical improvements are welcome.
 
-1. Check existing [issues](https://github.com/Kaztral-ar/ani-watch/issues).
-2. Describe the problem or proposed change clearly.
-3. Include reproduction steps or tests when possible.
+1. Check the [open issues](https://github.com/Kaztral-ar/ani-watch/issues).
+2. Open an issue to discuss larger changes.
+3. Submit a focused pull request with a clear description and tests where possible.
 
 ## 📄 License
 
-Released under the [MIT License](LICENSE).
+AniWatch is released under the [MIT License](LICENSE).
+
+---
 
 <div align="center">
 
-**[⬆ Back to top](#aniwatch)**
+**If AniWatch is useful, consider giving the project a ⭐**
 
-Made for the terminal.
+[⭐ Star on GitHub](https://github.com/Kaztral-ar/ani-watch) · [🐛 Report a bug](https://github.com/Kaztral-ar/ani-watch/issues) · [📚 Source code](https://github.com/Kaztral-ar/ani-watch)
+
+<sub>Made for the terminal. Powered by open source.</sub>
 
 </div>
