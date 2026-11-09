@@ -74,6 +74,38 @@ Search titles through HiAnime, explore episodes, discover anime information with
 </tr>
 </table>
 
+## 🌐 AniWatch website
+
+The repository includes a responsive website with a dedicated **How it works** homepage and an anime discovery experience.
+
+- **Home:** explains the AniWatch workflow in three steps — Discover, Choose, Watch.
+- **Discover:** search anime titles, browse posters, filter by type, and view MyAnimeList community scores.
+- **Anime details:** open a title to see its synopsis, genres, score, status, episodes, studios, producers, and other metadata.
+- **Live data:** anime information is loaded from the public [Jikan API](https://jikan.moe/). Scores are MyAnimeList community ratings, not ratings submitted to AniWatch.
+
+### Run the website locally
+
+No build step or package installation is required. Open `website/index.html` in a browser, or serve the folder locally:
+
+```sh
+cd website
+python3 -m http.server 8000
+```
+
+Then open `http://localhost:8000`.
+
+### Deploy with GitHub Pages
+
+A workflow is included at `.github/workflows/pages.yml` and publishes the `website/` directory when it changes on `main`.
+
+1. Open the repository's **Settings → Pages**.
+2. Set the build and deployment source to **GitHub Actions**.
+3. Push a change to `website/` or manually run **Deploy AniWatch Website** from Actions.
+
+After the first successful deployment, the site will be available at:
+
+**https://kaztral-ar.github.io/ani-watch/**
+
 ## 🚀 Quick start
 
 ### 1 · Install dependencies
