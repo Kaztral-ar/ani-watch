@@ -64,6 +64,22 @@ aw_interactive() {
     aw_title=$(printf '%s\n' "$aw_choice" | cut -f 2)
     printf 'Selected: %s\nAnime ID: %s\nNext: aniwatch episodes %s\n' "$aw_title" "$aw_slug" "$aw_slug"
 }
+aw_hls_command() {
+    [ "$#" -ge 1 ] || aw_die "hls requires a manifest URL"
+    aw_manifest=$1; shift
+    aw_quality=${1:-$ANIWATCH_QUALITY}
+    aw_referer=${2:-}
+    aw_title=${3:-AniWatch}
+    aw_hls_select_variant "$aw_manifest" "$aw_quality" "$aw_referer" >/dev/null || aw_die "HLS manifest resolution failed"
+    aw_play_hls "$aw_manifest" "$aw_quality" "$aw_referer" "$aw_title"
+}
+aw_hls_download_command() {
+    [ "$#" -ge 1 ] || aw_die "hls-download requires a manifest URL"
+    aw_manifest=$1; shift
+    aw_quality=${1:-$ANIWATCH_QUALITY}
+    aw_referer=${2:-}
+    aw_download_hls "$aw_manifest" "$aw_quality" "$aw_referer"
+}
 aw_media_command() {
     [ "$#" -ge 1 ] || aw_die "watch requires a URL"
     aw_url=$1; shift
@@ -91,6 +107,8 @@ aniwatch_main() {
         season) shift; aw_season_command "$@" ;;
         info) shift; aw_info_command "$@" ;;
         watch|play) shift; aw_media_command "$@" ;;
+        hls) shift; aw_hls_command "$@" ;;
+        hls-download) shift; aw_hls_download_command "$@" ;;
         download) shift; aw_download_command "$@" ;;
         history) shift; [ "$#" -eq 0 ] || aw_die "history takes no arguments"; aw_history_list ;;
         continue) shift; [ "$#" -eq 0 ] || aw_die "continue takes no arguments"; aw_history_continue ;;
