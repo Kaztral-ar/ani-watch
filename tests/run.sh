@@ -4,8 +4,9 @@ ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 BIN="$ROOT/bin/aniwatch"
 OUT=$(sh "$BIN" help)
 printf '%s\n' "$OUT" | grep -q 'anime discovery and playback'
+printf '%s\n' "$OUT" | grep -q 'search <query>'
 printf '%s\n' "$OUT" | grep -q 'download <url>'
-printf '%s\n' "$OUT" | grep -q 'hianime-search <query>'
+printf '%s\n' "$OUT" | grep -q 'metadata-search <query>'
 [ "$(sh "$BIN" version)" = "AniWatch 1.3.0" ]
 if sh "$BIN" info abc >/dev/null 2>&1; then echo "Expected invalid anime ID to fail" >&2; exit 1; fi
 if sh "$BIN" season 2026 monsoon >/dev/null 2>&1; then echo "Expected invalid season to fail" >&2; exit 1; fi
