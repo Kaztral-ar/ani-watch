@@ -7,7 +7,7 @@
   <h1>AniWatch</h1>
 
   <p><strong>Your anime corner, right in the terminal.</strong></p>
-  <p>Discover series · Explore episodes · Watch · Download</p>
+  <p>Discover anime on HiAnime · Explore episodes · Watch · Download</p>
 
   <p>
     <a href="https://github.com/Kaztral-ar/ani-watch/actions/workflows/ci.yml">
@@ -35,8 +35,8 @@
 
 | | Feature | What it does |
 |:--:|---|---|
-| 🔎 | **Anime discovery** | Search titles, explore top anime, seasonal picks and random recommendations |
-| 📺 | **Episode browsing** | Find episodes and inspect available server listings |
+| 🔎 | **HiAnime search** | Find anime directly through HiAnime |
+| 📺 | **Episode browsing** | Browse episodes and inspect available server listings |
 | ▶️ | **Playback** | Open supported media streams with MPV or VLC |
 | ⬇️ | **Downloads** | Download supported media and episode ranges |
 | 🎞️ | **HLS support** | Select available stream quality and play or download accessible playlists |
@@ -56,7 +56,7 @@ cd ani-watch
 ./bin/aniwatch
 ```
 
-That's it — open the interactive interface and start exploring.
+Open the interactive interface and search for your anime on HiAnime.
 
 ---
 
@@ -101,7 +101,7 @@ brew install git curl jq fzf yt-dlp mpv
 
 ## 🎬 Quick start
 
-### Search and browse
+### Search and browse on HiAnime
 
 ```sh
 # Search for an anime
@@ -112,21 +112,6 @@ brew install git curl jq fzf yt-dlp mpv
 
 # Inspect available servers for an episode
 ./bin/aniwatch servers <episode-id>
-```
-
-### Discover something to watch
-
-```sh
-# Search anime metadata
-./bin/aniwatch metadata-search "Naruto"
-
-# Explore recommendations
-./bin/aniwatch top
-./bin/aniwatch random
-./bin/aniwatch season
-
-# View anime details
-./bin/aniwatch info <mal-id>
 ```
 
 ---
@@ -207,10 +192,11 @@ ANIWATCH_SKIP_INTRO=1 ./bin/aniwatch
 
 ## ℹ️ Important notes
 
-- AniWatch supports **direct media URLs** and **accessible HLS playlists**.
+- AniWatch uses **HiAnime** for anime search, episode browsing, and server listings.
+- Playback supports **direct media URLs** and **accessible HLS playlists**.
 - A server shown in a listing is not guaranteed to provide a directly playable stream.
 - Opaque embed identifiers that require protected or obfuscated resolution are not decoded.
-- Provider endpoints and website structures can change, which may temporarily affect discovery or server listings.
+- Provider endpoints and website structures can change, which may temporarily affect search or server listings.
 - AniWatch does not bypass DRM or other access controls.
 
 ---
