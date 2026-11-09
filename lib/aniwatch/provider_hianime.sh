@@ -62,7 +62,7 @@ aw_hianime_parse_servers() {
         aw_type=$(printf '%s' "$aw_item" | sed -nE 's|.*data-type="([^"]*)".*|\1|p')
         aw_name=$(printf '%s' "$aw_item" | sed -nE 's|.*data-server-name="([^"]*)".*|\1|p')
         aw_id=$(printf '%s' "$aw_item" | sed -nE 's|.*data-id="([^"]*)".*|\1|p')
-        aw_url=$(printf '%s' "$aw_item" | sed -nE 's|.*data-(link|url|src)="(https?://[^"]+)".*|\2|p')
+        aw_url=$(printf '%s' "$aw_item" | sed -nE 's~.*data-(link|url|src)="(https?://[^"]+)".*~\2~p')
         if [ -n "$aw_type" ] && [ -n "$aw_name" ]; then
             aw_name=$(printf '%s' "$aw_name" | sed -e "s|&#039;|'|g" -e 's|&amp;|\&|g')
             aw_url=$(printf '%s' "$aw_url" | sed 's|&amp;|\&|g')
