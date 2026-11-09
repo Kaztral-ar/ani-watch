@@ -96,8 +96,15 @@ aw_download_hls() {
     [ -n "$aw_stream" ] || aw_die "no downloadable HLS stream found"
     mkdir -p "$ANIWATCH_DOWNLOAD_DIR" || aw_die "cannot create download directory"
     if [ -n "$aw_referer" ]; then
-        yt-dlp --no-playlist --referer "$aw_referer" --output "$ANIWATCH_DOWNLOAD_DIR/%(title).180B [%(id)s].%(ext)s" "$aw_stream"
+        yt-dlp --no-playlist --referer "$aw_referer" --output "$ANIWATCH_DOWNLOAD_DIR/%(title).180B [%(id)s].%(ext)s" "$aw_stream" && return 0
     else
-        yt-dlp --no-playlist --output "$ANIWATCH_DOWNLOAD_DIR/%(title).180B [%(id)s].%(ext)s" "$aw_stream"
+        yt-dlp --no-playlist --output "$ANIWATCH_DOWNLOAD_DIR/%(title).180B [%(id)s].%(ext)s" "$aw_stream" && return 0
+    fi
+    aw_require ffmpeg
+    aw_safe_title=$(printf '%s' "$aw_title" | tr '/\\:*?"<>|' '_________')
+    if [ -n "$aw_referer" ]; then
+        ffmpeg -nostdin -y -headers "Referer: $aw_referer\r\n" -i "$aw_stream" -c copy "$ANIWATCH_DOWNLOAD_DIR/$aw_safe_title.mp4"
+    else
+        ffmpeg -nostdin -y -i "$aw_stream" -c copy "$ANIWATCH_DOWNLOAD_DIR/$aw_safe_title.mp4"
     fi
 }
