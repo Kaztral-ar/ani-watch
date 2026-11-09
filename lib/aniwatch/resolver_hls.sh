@@ -154,7 +154,8 @@ aw_download_hls() {
     aw_require ffmpeg
     aw_hls_safe_title=$(printf '%s' "$aw_hls_download_title" | tr '/\\:*?"<>|' '_________')
     if [ -n "$aw_hls_download_referer" ]; then
-        aw_hls_ffmpeg_headers=$(printf 'Referer: %s\r\n' "$aw_hls_download_referer")
+        aw_hls_ffmpeg_headers=$(printf 'Referer: %s\r\nX' "$aw_hls_download_referer")
+        aw_hls_ffmpeg_headers=${aw_hls_ffmpeg_headers%X}
         ffmpeg -nostdin -y -headers "$aw_hls_ffmpeg_headers" -i "$aw_hls_download_manifest" -c copy "$ANIWATCH_DOWNLOAD_DIR/$aw_hls_safe_title.mp4"
     else
         ffmpeg -nostdin -y -i "$aw_hls_download_manifest" -c copy "$ANIWATCH_DOWNLOAD_DIR/$aw_hls_safe_title.mp4"
