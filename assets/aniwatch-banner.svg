@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="420" viewBox="0 0 1200 420" role="img" aria-labelledby="title desc">
+  <title id="title">AniWatch terminal anime toolkit</title>
+  <desc id="desc">A dark gradient banner with AniWatch branding and a terminal search preview.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#101827"/>
+      <stop offset=".55" stop-color="#172554"/>
+      <stop offset="1" stop-color="#312e81"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#67e8f9"/>
+      <stop offset="1" stop-color="#a5b4fc"/>
+    </linearGradient>
+    <filter id="glow"><feGaussianBlur stdDeviation="26"/></filter>
+  </defs>
+  <rect width="1200" height="420" rx="28" fill="url(#bg)"/>
+  <circle cx="1050" cy="65" r="120" fill="#6366f1" opacity=".24" filter="url(#glow)"/>
+  <circle cx="90" cy="390" r="130" fill="#06b6d4" opacity=".16" filter="url(#glow)"/>
+  <g opacity=".12" stroke="#c7d2fe" fill="none">
+    <path d="M0 90H1200M0 160H1200M0 230H1200M0 300H1200"/>
+    <path d="M140 0V420M280 0V420M420 0V420M560 0V420M700 0V420M840 0V420M980 0V420M1120 0V420"/>
+  </g>
+  <g transform="translate(76 72)">
+    <rect width="62" height="62" rx="18" fill="url(#accent)"/>
+    <path d="M17 43 31 17l14 26h-9l-5-10-5 10z" fill="#111827"/>
+    <text x="0" y="145" fill="#fff" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="76" font-weight="800" letter-spacing="-3">AniWatch</text>
+    <text x="3" y="190" fill="#c7d2fe" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="25">Your anime toolkit, right in the terminal.</text>
+    <text x="3" y="242" fill="url(#accent)" font-family="ui-monospace,SFMono-Regular,Consolas,monospace" font-size="17" font-weight="700">DISCOVER  /  BROWSE  /  PLAY  /  DOWNLOAD</text>
+  </g>
+  <g transform="translate(720 92)">
+    <rect width="405" height="230" rx="18" fill="#080f1e" stroke="#64748b" stroke-opacity=".55"/>
+    <path d="M0 18a18 18 0 0 1 18-18h369a18 18 0 0 1 18 18v28H0z" fill="#1e293b"/>
+    <circle cx="23" cy="23" r="5" fill="#fb7185"/><circle cx="43" cy="23" r="5" fill="#fbbf24"/><circle cx="63" cy="23" r="5" fill="#34d399"/>
+    <text x="88" y="28" fill="#94a3b8" font-family="ui-monospace,monospace" font-size="12">aniwatch — terminal</text>
+    <text x="26" y="86" fill="#67e8f9" font-family="ui-monospace,monospace" font-size="15">$ aniwatch search "Frieren"</text>
+    <text x="26" y="122" fill="#e2e8f0" font-family="ui-monospace,monospace" font-size="14">› Frieren: Beyond Journey's End</text>
+    <text x="26" y="153" fill="#94a3b8" font-family="ui-monospace,monospace" font-size="13">› Browse episodes</text>
+    <text x="26" y="184" fill="#94a3b8" font-family="ui-monospace,monospace" font-size="13">› Choose a supported stream</text>
+    <rect x="26" y="198" width="8" height="15" rx="2" fill="#67e8f9"/>
+  </g>
+  <text x="1120" y="382" text-anchor="end" fill="#a5b4fc" opacity=".75" font-family="Inter,Arial,sans-serif" font-size="13">POSIX SHELL · TERMUX · LINUX · macOS</text>
+</svg>
