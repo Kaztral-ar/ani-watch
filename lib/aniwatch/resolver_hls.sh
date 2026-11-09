@@ -78,6 +78,7 @@ aw_play_hls() {
     aw_stream=$(aw_hls_select_variant "$aw_manifest" "$aw_quality" "$aw_referer") || aw_die "could not inspect HLS manifest"
     [ -n "$aw_stream" ] || aw_die "no playable HLS stream found"
     aw_require mpv
+    aw_history_add "$aw_stream" "$aw_title" "${5:-}" "${6:-}" "$aw_referer"
     if [ -n "$aw_referer" ]; then
         mpv --referrer="$aw_referer" --force-media-title="$aw_title" "$aw_stream"
     else
