@@ -54,30 +54,55 @@ function wait(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+async function fetchWithTimeout(url, signal, timeoutMs = 15000) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  const abortFromCaller = () => controller.abort();
+  signal.addEventListener("abort", abortFromCaller, { once: true });
+
+  try {
+    const response = await fetch(url, { signal: controller.signal });
+    return response;
+  } catch (error) {
+    if (signal.aborted) throw new DOMException("Request cancelled", "AbortError");
+    if (controller.signal.aborted) {
+      throw new Error("The anime API took too long to respond. Check your connection and try again.");
+    }
+    throw new Error("Unable to reach the anime API. Check your internet connection or try again later.");
+  } finally {
+    clearTimeout(timeoutId);
+    signal.removeEventListener("abort", abortFromCaller);
+  }
+}
+
 async function requestAnime(url, signal) {
-  // Jikan applies public rate limits. Keep requests spaced apart.
+  // Jikan is a public API with rate limits. Space out requests.
   const waitTime = Math.max(0, 1100 - (Date.now() - lastRequestAt));
   if (waitTime) await wait(waitTime);
   if (signal.aborted) throw new DOMException("Request cancelled", "AbortError");
 
   lastRequestAt = Date.now();
-  let response = await fetch(url, { signal });
+  let response = await fetchWithTimeout(url, signal);
 
-  // Retry a rate-limited request once after a short cooldown.
+  // Retry a rate-limited request once after a cooldown.
   if (response.status === 429) {
-    await wait(1800);
+    await wait(3000);
     if (signal.aborted) throw new DOMException("Request cancelled", "AbortError");
     lastRequestAt = Date.now();
-    response = await fetch(url, { signal });
+    response = await fetchWithTimeout(url, signal);
   }
 
   if (!response.ok) {
     if (response.status === 429) {
-      throw new Error("Jikan is rate-limiting requests. Wait a few seconds and try again.");
+      throw new Error("Jikan is temporarily rate-limiting requests. Wait a few seconds and try again.");
     }
     throw new Error(`Anime API returned an error (${response.status}). Please try again.`);
   }
-  return response.json();
+  try {
+    return await response.json();
+  } catch {
+    throw new Error("The anime API returned an invalid response. Please try again.");
+  }
 }
 
 async function loadAnime() {
