@@ -1,0 +1,29 @@
+name: AniWatch CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  shell-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Check POSIX shell syntax
+        run: |
+          set -eu
+          find bin lib scripts tests -type f -name '*.sh' -o -path 'bin/aniwatch' | while IFS= read -r file; do
+            sh -n "$file"
+          done
+      - name: Run smoke tests
+        run: make test
+      - name: Build standalone command
+        run: make build
+      - name: Verify standalone help
+        run: sh dist/aniwatch help
