@@ -79,10 +79,10 @@ aw_play_url() {
             if [ -n "$aw_skip_flags" ]; then
                 # ani-skip emits MPV command-line options; split those options into argv.
                 # shellcheck disable=SC2086
-                mpv $aw_skip_flags --force-media-title="$aw_title" --ytdl-format="$aw_format" --alang="$aw_audio" --slang="en,eng" "$aw_url"
+                if [ -n "$aw_referer" ]; then mpv $aw_skip_flags --referrer="$aw_referer" --force-media-title="$aw_title" --ytdl-format="$aw_format" --alang="$aw_audio" --slang="en,eng" "$aw_url"; else mpv $aw_skip_flags --force-media-title="$aw_title" --ytdl-format="$aw_format" --alang="$aw_audio" --slang="en,eng" "$aw_url"; fi
             else
                 [ "$ANIWATCH_SKIP_INTRO" != "1" ] || aw_info "Ani-Skip unavailable or no skip data for this episode"
-                mpv --force-media-title="$aw_title" --ytdl-format="$aw_format" --alang="$aw_audio" --slang="en,eng" "$aw_url"
+                if [ -n "$aw_referer" ]; then mpv --referrer="$aw_referer" --force-media-title="$aw_title" --ytdl-format="$aw_format" --alang="$aw_audio" --slang="en,eng" "$aw_url"; else mpv --force-media-title="$aw_title" --ytdl-format="$aw_format" --alang="$aw_audio" --slang="en,eng" "$aw_url"; fi
             fi
             ;;
         vlc)
