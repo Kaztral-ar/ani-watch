@@ -1,4 +1,4 @@
-const API = "https://api.jikan.moe/v4";
+const API = "https://api.tenrai.org/v1";
 const grid = document.querySelector("#anime-grid");
 const statusBox = document.querySelector("#status");
 const form = document.querySelector("#search-form");
@@ -76,7 +76,7 @@ async function fetchWithTimeout(url, signal, timeoutMs = 15000) {
 }
 
 async function requestAnime(url, signal) {
-  // Jikan is a public API with rate limits. Space out requests.
+  // Tenrai is a public API with rate limits. Space out requests.
   const waitTime = Math.max(0, 1100 - (Date.now() - lastRequestAt));
   if (waitTime) await wait(waitTime);
   if (signal.aborted) throw new DOMException("Request cancelled", "AbortError");
@@ -94,7 +94,7 @@ async function requestAnime(url, signal) {
 
   if (!response.ok) {
     if (response.status === 429) {
-      throw new Error("Jikan is temporarily rate-limiting requests. Wait a few seconds and try again.");
+      throw new Error("Tenrai is temporarily rate-limiting requests. Wait a few seconds and try again.");
     }
     throw new Error(`Anime API returned an error (${response.status}). Please try again.`);
   }
