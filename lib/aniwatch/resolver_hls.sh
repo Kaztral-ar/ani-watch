@@ -77,13 +77,25 @@ aw_play_hls() {
     aw_title=${4:-AniWatch}
     aw_stream=$(aw_hls_select_variant "$aw_manifest" "$aw_quality" "$aw_referer") || aw_die "could not inspect HLS manifest"
     [ -n "$aw_stream" ] || aw_die "no playable HLS stream found"
-    aw_require mpv
     aw_history_add "$aw_stream" "$aw_title" "${5:-}" "${6:-}" "$aw_referer"
-    if [ -n "$aw_referer" ]; then
-        mpv --referrer="$aw_referer" --force-media-title="$aw_title" "$aw_stream"
-    else
-        mpv --force-media-title="$aw_title" "$aw_stream"
-    fi
+    case "$ANIWATCH_PLAYER" in
+        mpv)
+            aw_require mpv
+            aw_skip_flags=$(aw_aniskip_flags "${7:-}" "${6:-}" || :)
+            if [ -n "$aw_skip_flags" ]; then
+                # shellcheck disable=SC2086
+                if [ -n "$aw_referer" ]; then mpv $aw_skip_flags --referrer="$aw_referer" --force-media-title="$aw_title" "$aw_stream"; else mpv $aw_skip_flags --force-media-title="$aw_title" "$aw_stream"; fi
+            else
+                if [ -n "$aw_referer" ]; then mpv --referrer="$aw_referer" --force-media-title="$aw_title" "$aw_stream"; else mpv --force-media-title="$aw_title" "$aw_stream"; fi
+            fi
+            ;;
+        vlc)
+            aw_require vlc
+            [ "$ANIWATCH_SKIP_INTRO" != "1" ] || aw_info "Ani-Skip integration is MPV-only"
+            if [ -n "$aw_referer" ]; then vlc --http-referrer="$aw_referer" --meta-title="$aw_title" "$aw_stream"; else vlc --meta-title="$aw_title" "$aw_stream"; fi
+            ;;
+        *) aw_die "ANIWATCH_PLAYER must be mpv or vlc" ;;
+    esac
 }
 
 aw_download_hls() {
