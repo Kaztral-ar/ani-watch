@@ -1,27 +1,27 @@
 # AniWatch
 
-AniWatch is a modular POSIX shell CLI for discovering anime from your terminal. It supports title search, popular-anime listings, detailed metadata, and launching direct media URLs with a local player.
+AniWatch is a modular POSIX-shell anime discovery CLI. It brings a lightweight terminal workflow to Jikan/MyAnimeList metadata, with interactive selection through **fzf** and optional playback of direct media URLs through a local player.
 
-**Metadata provider:** [Jikan API](https://jikan.moe/) (MyAnimeList data). Jikan does not provide streaming links. AniWatch does not host or scrape video content.
+> **Scope:** Jikan provides anime metadata, not episode streams. AniWatch does not currently scrape streaming providers, resolve episodes, or generate playback URLs. The `play` command accepts a direct media URL supplied by the user.
 
 ## Features
 
-- Search anime by title.
-- Browse popular anime.
-- View full anime metadata and synopsis.
-- Launch a direct media URL with mpv or VLC.
-- Modular shell source with a standalone build target.
-- Smoke tests that run without network access.
+- Search anime titles and display scores, episode counts, and types.
+- Interactive search and title selection with fzf.
+- Browse popular anime and the current seasonal catalogue.
+- Browse a specific season by year and season name.
+- Discover a random anime and inspect full details, genres, and synopsis.
+- Play a direct HTTP(S) media URL with mpv or VLC.
+- Modular source, standalone build, and offline smoke tests.
 
 ## Requirements
 
 - POSIX-compatible shell
 - `curl` and `jq` for metadata commands
+- `fzf` for interactive mode
 - `mpv` or VLC for direct URL playback
 
 ## Install
-
-Clone the repository and install the command:
 
 ```sh
 git clone https://github.com/Kaztral-ar/ani-watch.git
@@ -29,7 +29,7 @@ cd ani-watch
 sudo make install
 ```
 
-Or run it directly from the checkout:
+Run from the checkout without installing:
 
 ```sh
 sh bin/aniwatch help
@@ -38,25 +38,41 @@ sh bin/aniwatch help
 ## Usage
 
 ```sh
-aniwatch search "Frieren"
-aniwatch top
-aniwatch info 52991
-aniwatch play "https://example.com/video.mp4"
+# Interactive title search and selection (requires fzf)
 aniwatch
+
+# Search and list matching titles
+aniwatch search "Frieren"
+
+# Browse popular and currently airing-season catalogues
+aniwatch top
+aniwatch season
+
+# Browse a specific season
+aniwatch season 2025 fall
+
+# Random title and full metadata
+aniwatch random
+aniwatch info 52991
+
+# Play a direct media URL
+aniwatch play "https://example.com/video.mp4"
 ```
+
+Supported season names: `winter`, `spring`, `summer`, `autumn`.
 
 ## Configuration
 
 | Variable | Default | Purpose |
 |---|---|---|
 | `ANIWATCH_API_URL` | `https://api.jikan.moe/v4` | Metadata API base URL |
-| `ANIWATCH_LIMIT` | `10` | Number of search/top results |
+| `ANIWATCH_LIMIT` | `10` | Number of search/season results |
 | `ANIWATCH_PLAYER` | `mpv` | Preferred direct-URL player |
 
 Example:
 
 ```sh
-ANIWATCH_LIMIT=15 aniwatch search "One Piece"
+ANIWATCH_LIMIT=20 aniwatch search "One Piece"
 ```
 
 ## Development
@@ -64,9 +80,28 @@ ANIWATCH_LIMIT=15 aniwatch search "One Piece"
 ```sh
 make test
 make build
+sh dist/aniwatch help
 ```
 
-The modular source lives in `lib/aniwatch/`. The generated standalone command is written to `dist/aniwatch`.
+Source modules live in `lib/aniwatch/`. The standalone build is generated at `dist/aniwatch`.
+
+## Comparison with upstream ani-cli
+
+AniWatch takes inspiration from the terminal-first workflow of [pystardust/ani-cli](https://github.com/pystardust/ani-cli), but it is a separate implementation and does not copy its GPL-3.0 source.
+
+| Capability | upstream ani-cli | AniWatch |
+|---|---|---|
+| Interactive terminal selection | fzf, rofi, dmenu | fzf |
+| Search and catalogue browsing | Provider-backed scraping | Jikan metadata API |
+| Episode resolution and streaming | Yes, provider dependent | Not implemented |
+| Sub/dub selection and quality | Yes | Not implemented |
+| Download and batch episodes | Yes | Not implemented |
+| Watch history / continue | Yes | Not implemented |
+| Syncplay / intro skip | Supported integrations | Not implemented |
+| Popular and seasonal discovery | Search/provider flow | Jikan top/current/specific season |
+| Modular shell source and build | Single main script | Split modules + standalone build |
+
+The upstream project has a broader playback feature set, including episode selection, quality selection, downloads, history, Syncplay, and intro skipping. AniWatch currently focuses on metadata discovery and a maintainable modular base. These playback features require a compatible streaming provider and are not falsely exposed as working commands here.
 
 ## Project layout
 
@@ -75,6 +110,7 @@ bin/aniwatch              CLI entry point
 lib/aniwatch/             Application modules
 scripts/build.sh          Standalone build script
 tests/run.sh              Offline smoke tests
+.github/workflows/ci.yml  CI checks
 Makefile                  Development and install targets
 LICENSE                   MIT license
 ```
