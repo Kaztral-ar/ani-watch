@@ -4,8 +4,8 @@ aw_usage() {
 AniWatch — modular anime discovery and playback CLI
 
 Discovery:
-  aniwatch search <query>           Search Jikan anime metadata
-  aniwatch hianime-search <query>    Search HiAnime titles
+  aniwatch search <query>           Search HiAnime titles
+  aniwatch metadata-search <query>   Search Jikan anime metadata
   aniwatch episodes <anime_id>      List HiAnime episodes
   aniwatch servers <episode_id>     List available server labels
   aniwatch top                      Show popular anime
