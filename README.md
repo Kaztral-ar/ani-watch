@@ -14,7 +14,7 @@ AniWatch is a modular POSIX-shell anime discovery and playback CLI. It combines 
 - Prefer Japanese audio (`sub`) or English audio (`dub`) when the source exposes language metadata.
 - Select best, worst, 360p, 480p, 720p or 1080p formats when available.
 - Download supported media with subtitles when supplied by the source.
-- Record watch history and resume the last URL.
+- Record episode-aware watch history (anime slug and episode number) and resume the last URL; older history files remain readable.
 - Join a Syncplay room to synchronize playback with friends.
 - Modular POSIX shell source, standalone build and offline tests.
 
@@ -89,7 +89,7 @@ The HLS resolver supports accessible master playlists and relative variant URLs.
 
 ### Watch history
 
-History is stored locally at `$XDG_STATE_HOME/aniwatch/history.tsv`. If `XDG_STATE_HOME` is unset, AniWatch uses `~/.local/state/aniwatch/`. Override the location with `ANIWATCH_STATE_DIR`. History is not uploaded.
+History is stored locally at `$XDG_STATE_HOME/aniwatch/history.tsv`. If `XDG_STATE_HOME` is unset, AniWatch uses `~/.local/state/aniwatch/`. New entries include anime ID and episode number; legacy three-column entries remain readable. Override the location with `ANIWATCH_STATE_DIR`. History is not uploaded.
 
 ## Configuration
 
@@ -127,7 +127,7 @@ AniWatch is an independent implementation inspired by the terminal workflow of [
 | Sub/dub | Provider server selection | Audio-language preference for supplied URLs; provider selection pending |
 | Quality | Provider/HLS selection | HLS variant selection + yt-dlp format selection |
 | Downloads | yt-dlp / ffmpeg fallback | yt-dlp for supported URLs and HLS variants |
-| Watch history | Episode-aware | Local URL history |
+| Watch history | Episode-aware | Episode-aware for interactive direct-stream playback; legacy URL history supported |
 | Syncplay | Yes | Syncplay client integration |
 
 ## License
