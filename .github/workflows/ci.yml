@@ -29,7 +29,7 @@ jobs:
       - name: Run ShellCheck
         run: |
           find bin lib scripts tests -type f \( -name '*.sh' -o -path 'bin/aniwatch' \) -print |
-          xargs shellcheck -s sh -S error
+          xargs shellcheck -s sh
       - name: Run smoke tests
         run: make test
       - name: Test with dash
