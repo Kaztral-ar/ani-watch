@@ -91,10 +91,12 @@ aw_download_hls() {
     aw_referer=${3:-}
     aw_title=${4:-AniWatch}
     aw_require yt-dlp
+    aw_stream=$(aw_hls_select_variant "$aw_manifest" "$aw_quality" "$aw_referer") || aw_die "could not select HLS quality"
+    [ -n "$aw_stream" ] || aw_die "no downloadable HLS stream found"
     mkdir -p "$ANIWATCH_DOWNLOAD_DIR" || aw_die "cannot create download directory"
     if [ -n "$aw_referer" ]; then
-        yt-dlp --no-playlist --referer "$aw_referer" --format "best[height<=${aw_quality%p}]/best" --output "$ANIWATCH_DOWNLOAD_DIR/%(title).180B [%(id)s].%(ext)s" "$aw_manifest"
+        yt-dlp --no-playlist --referer "$aw_referer" --output "$ANIWATCH_DOWNLOAD_DIR/%(title).180B [%(id)s].%(ext)s" "$aw_stream"
     else
-        yt-dlp --no-playlist --output "$ANIWATCH_DOWNLOAD_DIR/%(title).180B [%(id)s].%(ext)s" "$aw_manifest"
+        yt-dlp --no-playlist --output "$ANIWATCH_DOWNLOAD_DIR/%(title).180B [%(id)s].%(ext)s" "$aw_stream"
     fi
 }
