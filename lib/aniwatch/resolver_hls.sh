@@ -100,10 +100,18 @@ aw_play_hls() {
             if [ -n "$aw_hls_play_skip" ]; then
                 case $- in *f*) aw_hls_play_noglob=1 ;; *) aw_hls_play_noglob=0; set -f ;; esac
                 if [ -n "$aw_hls_play_referer" ]; then
-                    mpv $aw_hls_play_skip --referrer="$aw_hls_play_referer" --force-media-title="$aw_hls_play_title" --ytdl-format="$aw_hls_play_format" --alang="$aw_hls_play_audio" -- "$aw_hls_play_manifest"
+                    # shellcheck disable=SC2086
+                    mpv 
+                    # shellcheck disable=SC2086
+                    mpv $aw_
+ --referrer="$aw_hls_play_referer" --force-media-title="$aw_hls_play_title" --ytdl-format="$aw_hls_play_format" --alang="$aw_hls_play_audio" -- "$aw_hls_play_manifest"
                     aw_hls_play_status=$?
                 else
-                    mpv $aw_hls_play_skip --force-media-title="$aw_hls_play_title" --ytdl-format="$aw_hls_play_format" --alang="$aw_hls_play_audio" -- "$aw_hls_play_manifest"
+                    # shellcheck disable=SC2086
+                    mpv 
+                    # shellcheck disable=SC2086
+                    mpv $aw_
+ --force-media-title="$aw_hls_play_title" --ytdl-format="$aw_hls_play_format" --alang="$aw_hls_play_audio" -- "$aw_hls_play_manifest"
                     aw_hls_play_status=$?
                 fi
                 [ "$aw_hls_play_noglob" -eq 1 ] || set +f
