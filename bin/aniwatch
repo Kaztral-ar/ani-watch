@@ -1,0 +1,12 @@
+#!/bin/sh
+# AniWatch command-line anime discovery client.
+ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+. "$ROOT/lib/aniwatch/core.sh"
+. "$ROOT/lib/aniwatch/config.sh"
+. "$ROOT/lib/aniwatch/http.sh"
+. "$ROOT/lib/aniwatch/provider_jikan.sh"
+. "$ROOT/lib/aniwatch/ui.sh"
+. "$ROOT/lib/aniwatch/player.sh"
+. "$ROOT/lib/aniwatch/cli.sh"
+. "$ROOT/lib/aniwatch/main.sh"
+aniwatch_main "$@"
