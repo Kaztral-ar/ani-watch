@@ -21,6 +21,7 @@ if sh "$BIN" syncplay not-a-url >/dev/null 2>&1; then echo "Expected invalid Syn
 . "$ROOT/lib/aniwatch/http.sh"
 . "$ROOT/lib/aniwatch/provider_hianime.sh"
 . "$ROOT/lib/aniwatch/player.sh"
+. "$ROOT/lib/aniwatch/resolver_hls.sh"
 [ "$(aw_hianime_validate_episode_id 123 2>/dev/null; printf ok)" = "ok" ]
 if (aw_hianime_validate_episode_id nope) >/dev/null 2>&1; then echo "Expected invalid episode ID to fail" >&2; exit 1; fi
 if (aw_hianime_validate_slug 'bad/slug') >/dev/null 2>&1; then echo "Expected invalid anime slug to fail" >&2; exit 1; fi
@@ -28,6 +29,10 @@ sample='<div class="ep-item" data-id="98765" data-number="1"><a href="/watch/dem
 [ "$(aw_hianime_parse_episodes "$sample")" = "$(printf '98765\t1')" ]
 servers='<div class="server-item" data-id="22" data-server-name="Example" data-type="sub"></div>'
 [ "$(aw_hianime_parse_servers "$servers")" = "$(printf 'sub\tExample\t22')" ]
+[ "$(aw_hls_resolve_uri "https://cdn.example.test/path/master.m3u8" "720/index.m3u8")" = "https://cdn.example.test/path/720/index.m3u8" ]
+[ "$(aw_hls_resolve_uri "https://cdn.example.test/path/master.m3u8" "/hls/720.m3u8")" = "https://cdn.example.test/hls/720.m3u8" ]
+[ "$(aw_hls_resolve_uri "https://cdn.example.test/path/master.m3u8" "//media.example.test/v/720.m3u8")" = "https://media.example.test/v/720.m3u8" ]
+[ "$(aw_hls_resolve_uri "https://cdn.example.test/path/master.m3u8" "https://other.example.test/a.m3u8")" = "https://other.example.test/a.m3u8" ]
 tmpdir=$(mktemp -d)
 ANIWATCH_STATE_DIR=$tmpdir/state
 ANIWATCH_HISTORY=$ANIWATCH_STATE_DIR/history.tsv
