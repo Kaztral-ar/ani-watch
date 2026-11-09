@@ -1,5 +1,5 @@
 #!/bin/sh
-set -eux
+set -eu
 ROOT=$(CDPATH='' cd -- "$(dirname -- "$0")/.." && pwd)
 BIN="$ROOT/bin/aniwatch"
 TEST_SHELL=${TEST_SHELL:-sh}
@@ -146,6 +146,18 @@ grep -q 'Frieren Episode 2' "$ANIWATCH_HISTORY"
 grep -q -- '--referrer=https://hianime.at' "$MOCK_MPV_ARGS"
 grep -q -- '--' "$MOCK_MPV_ARGS"
 grep -q 'https://cdn.example.test/episode.mp4' "$MOCK_MPV_ARGS"
+
+# A player that exits unsuccessfully must not create a history entry.
+before_failed_play=$(wc -l < "$ANIWATCH_HISTORY" | tr -d ' ')
+MOCK_MPV_EXIT=8
+export MOCK_MPV_EXIT
+if aw_play_url "https://cdn.example.test/failed.mp4" best sub "Failed Episode"; then
+    echo "Expected player failure to propagate" >&2
+    exit 1
+fi
+unset MOCK_MPV_EXIT
+after_failed_play=$(wc -l < "$ANIWATCH_HISTORY" | tr -d ' ')
+[ "$before_failed_play" -eq "$after_failed_play" ]
 
 # Continue must resume a direct media URL with its Referer, not treat it as HLS.
 aw_history_add "https://cdn.example.test/direct.mp4" "Frieren Episode 3" "frieren" "3" "https://hianime.at" "dub"
