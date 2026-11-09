@@ -13,9 +13,9 @@ test:
 build:
 	@sh scripts/build.sh
 
-install:
+install: build
 	@mkdir -p "$(DESTDIR)$(BINDIR)"
-	@install -m 755 bin/aniwatch "$(DESTDIR)$(BINDIR)/aniwatch"
+	@install -m 755 dist/aniwatch "$(DESTDIR)$(BINDIR)/aniwatch"
 
 uninstall:
 	@rm -f "$(DESTDIR)$(BINDIR)/aniwatch"
