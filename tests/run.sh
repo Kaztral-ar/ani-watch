@@ -144,10 +144,10 @@ grep -q 'https://cdn.example.test/direct.mp4' "$MOCK_MPV_ARGS"
 # HLS playback receives the master playlist (including alternate audio metadata).
 aw_play_hls "https://cdn.example.test/master.m3u8" 720p "https://hianime.at" "Frieren" "frieren" "3" "" dub
 grep -q 'https://cdn.example.test/master.m3u8' "$MOCK_MPV_ARGS"
-grep -q 'https://cdn.example.test/high/index.m3u8' "$MOCK_MPV_ARGS" && {
+if grep -q 'https://cdn.example.test/high/index.m3u8' "$MOCK_MPV_ARGS"; then
     echo "HLS playback should retain the master playlist, not a video-only variant" >&2
     exit 1
-} || :
+fi
 grep -q -- '--ytdl-format=' "$MOCK_MPV_ARGS"
 
 # The master URL's separate audio rendition remains in the source manifest.
