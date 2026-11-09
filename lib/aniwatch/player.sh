@@ -50,17 +50,52 @@ aw_history_add() {
     printf '%s\t%s\t%s\t%s\t%s\t%s\n' "$aw_now" "$aw_safe_anime" "$aw_safe_episode" "$aw_safe_title" "$aw_safe_url" "$aw_safe_referer" >> "$ANIWATCH_HISTORY"
 }
 
+aw_aniskip_flags() {
+    aw_mal_id=$1
+    aw_episode_no=$2
+    [ "$ANIWATCH_SKIP_INTRO" = "1" ] || return 1
+    [ -n "$aw_mal_id" ] && [ -n "$aw_episode_no" ] || return 1
+    command -v ani-skip >/dev/null 2>&1 || return 1
+    ani-skip -i "$aw_mal_id" -e "$aw_episode_no" 2>/dev/null
+}
+
 aw_play_url() {
     aw_url=$1
     aw_quality=${2:-$ANIWATCH_QUALITY}
     aw_mode=${3:-$ANIWATCH_MODE}
+    aw_title=${4:-AniWatch}
+    aw_mal_id=${5:-}
+    aw_episode_no=${6:-}
+    aw_referer=${7:-}
     aw_validate_url "$aw_url"
-    aw_require yt-dlp
-    aw_require mpv
-    aw_format=$(aw_quality_format "$aw_quality" "$aw_mode")
-    aw_audio=$(aw_audio_language "$aw_mode")
-    aw_history_add "$aw_url" "$aw_url"
-    mpv --ytdl-format="$aw_format" --alang="$aw_audio" --slang="en,eng" "$aw_url"
+    aw_history_add "$aw_url" "$aw_title" "$aw_mal_id" "$aw_episode_no" "$aw_referer"
+    case "$ANIWATCH_PLAYER" in
+        mpv)
+            aw_require mpv
+            aw_require yt-dlp
+            aw_format=$(aw_quality_format "$aw_quality" "$aw_mode")
+            aw_audio=$(aw_audio_language "$aw_mode")
+            aw_skip_flags=$(aw_aniskip_flags "$aw_mal_id" "$aw_episode_no" || :)
+            if [ -n "$aw_skip_flags" ]; then
+                # ani-skip emits MPV command-line options; split those options into argv.
+                # shellcheck disable=SC2086
+                mpv $aw_skip_flags --force-media-title="$aw_title" --ytdl-format="$aw_format" --alang="$aw_audio" --slang="en,eng" "$aw_url"
+            else
+                [ "$ANIWATCH_SKIP_INTRO" != "1" ] || aw_info "Ani-Skip unavailable or no skip data for this episode"
+                mpv --force-media-title="$aw_title" --ytdl-format="$aw_format" --alang="$aw_audio" --slang="en,eng" "$aw_url"
+            fi
+            ;;
+        vlc)
+            aw_require vlc
+            [ "$ANIWATCH_SKIP_INTRO" != "1" ] || aw_info "Ani-Skip integration is MPV-only"
+            if [ -n "$aw_referer" ]; then
+                vlc --http-referrer="$aw_referer" --meta-title="$aw_title" "$aw_url"
+            else
+                vlc --meta-title="$aw_title" "$aw_url"
+            fi
+            ;;
+        *) aw_die "ANIWATCH_PLAYER must be mpv or vlc" ;;
+    esac
 }
 
 aw_download_url() {
