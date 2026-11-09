@@ -168,7 +168,6 @@ if MOCK_YTDLP_EXIT=1 aw_download_hls "https://cdn.example.test/fallback.m3u8" 72
     :
 fi
 grep -q "0d 0a" "$MOCK_FFMPEG_HEADER_HEX"
-grep -q "0d 0a" "$MOCK_FFMPEG_HEADER_HEX"
 
 # The master URL's separate audio rendition remains in the source manifest.
 # Bulk failures are isolated to their own episode and only successful downloads count.
