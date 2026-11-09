@@ -35,6 +35,17 @@ linked_server='<div class="server-item" data-type="dub" data-server-name="Public
 [ "$(aw_hls_resolve_uri "https://cdn.example.test/path/master.m3u8" "/hls/720.m3u8")" = "https://cdn.example.test/hls/720.m3u8" ]
 [ "$(aw_hls_resolve_uri "https://cdn.example.test/path/master.m3u8" "//media.example.test/v/720.m3u8")" = "https://media.example.test/v/720.m3u8" ]
 [ "$(aw_hls_resolve_uri "https://cdn.example.test/path/master.m3u8" "https://other.example.test/a.m3u8")" = "https://other.example.test/a.m3u8" ]
+curl() {
+    cat <<'HLS'
+#EXTM3U
+#EXT-X-STREAM-INF:BANDWIDTH=800000,RESOLUTION=640x360
+low/index.m3u8
+#EXT-X-STREAM-INF:BANDWIDTH=1800000,RESOLUTION=1280x720
+high/index.m3u8
+HLS
+}
+[ "$(aw_hls_select_variant "https://cdn.example.test/master.m3u8" best)" = "https://cdn.example.test/high/index.m3u8" ]
+[ "$(aw_hls_select_variant "https://cdn.example.test/master.m3u8" 480p)" = "https://cdn.example.test/low/index.m3u8" ]
 tmpdir=$(mktemp -d)
 ANIWATCH_STATE_DIR=$tmpdir/state
 ANIWATCH_HISTORY=$ANIWATCH_STATE_DIR/history.tsv
