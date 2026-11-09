@@ -3,7 +3,13 @@
 aw_search_command() {
     [ "$#" -gt 0 ] || aw_die "search requires a query; run 'aniwatch help'"
     aw_check_deps
-    aw_data=$(aw_search "$*") || aw_die "anime search request failed"
+    aw_data=$(aw_hianime_search "$*") || aw_die "HiAnime search request failed"
+    aw_hianime_print_search "$aw_data"
+}
+aw_metadata_search_command() {
+    [ "$#" -gt 0 ] || aw_die "metadata-search requires a query"
+    aw_check_deps
+    aw_data=$(aw_search "$*") || aw_die "Jikan metadata search request failed"
     aw_show_results "$aw_data"
 }
 aw_top_command() {
@@ -32,12 +38,6 @@ aw_info_command() {
     aw_data=$(aw_info_by_id "$1") || aw_die "could not retrieve anime details"
     printf '%s\n' "$aw_data" | aw_print_info
 }
-aw_hianime_search_command() {
-    [ "$#" -gt 0 ] || aw_die "hianime-search requires a query"
-    aw_check_deps
-    aw_data=$(aw_hianime_search "$*") || aw_die "HiAnime search request failed"
-    aw_hianime_print_search "$aw_data"
-}
 aw_hianime_episodes_command() {
     [ "$#" -eq 1 ] || aw_die "episodes requires one HiAnime anime ID/slug"
     aw_check_deps
@@ -54,11 +54,15 @@ aw_interactive() {
     aw_check_deps
     command -v fzf >/dev/null 2>&1 || aw_die "interactive mode requires fzf; run 'aniwatch search QUERY' instead"
     aw_header
-    printf 'Search anime metadata: '
+    printf 'Search HiAnime: '
     IFS= read -r aw_query || exit 0
     [ -n "$aw_query" ] || aw_die "search query cannot be empty"
-    aw_data=$(aw_search "$aw_query") || aw_die "anime search request failed"
-    aw_pick_search_result "$aw_data"
+    aw_data=$(aw_hianime_search "$aw_query") || aw_die "HiAnime search request failed"
+    [ -n "$aw_data" ] || aw_die "no HiAnime results found"
+    aw_choice=$(printf '%s\n' "$aw_data" | fzf --with-nth=2 --delimiter="$(printf '\t')" --prompt='Select anime> ') || return 1
+    aw_slug=$(printf '%s\n' "$aw_choice" | cut -f 1)
+    aw_title=$(printf '%s\n' "$aw_choice" | cut -f 2)
+    printf 'Selected: %s\nAnime ID: %s\nNext: aniwatch episodes %s\n' "$aw_title" "$aw_slug" "$aw_slug"
 }
 aw_media_command() {
     [ "$#" -ge 1 ] || aw_die "watch requires a URL"
@@ -79,7 +83,7 @@ aw_download_command() {
 aniwatch_main() {
     case "${1:-}" in
         search) shift; aw_search_command "$@" ;;
-        hianime-search) shift; aw_hianime_search_command "$@" ;;
+        metadata-search) shift; aw_metadata_search_command "$@" ;;
         episodes) shift; aw_hianime_episodes_command "$@" ;;
         servers) shift; aw_hianime_servers_command "$@" ;;
         top) shift; aw_top_command ;;
