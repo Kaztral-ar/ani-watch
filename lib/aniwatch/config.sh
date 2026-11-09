@@ -19,6 +19,7 @@ export ANIWATCH_STATE_DIR ANIWATCH_HISTORY ANIWATCH_SYNCPLAY_SERVER
 aw_check_deps() {
     aw_require curl
     aw_require jq
+    case "$ANIWATCH_HIANIME_BASE" in http://*|https://*) ;; *) aw_die "ANIWATCH_HIANIME_BASE must be an http(s) URL" ;; esac
     case "$ANIWATCH_LIMIT" in
         ''|*[!0-9]*|0) aw_die "ANIWATCH_LIMIT must be a positive integer" ;;
     esac
