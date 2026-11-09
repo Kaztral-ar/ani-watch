@@ -20,8 +20,8 @@ aw_season_now() {
 }
 
 aw_season() {
-    case "$1:$2" in
-        *[!0-9:]*|:*) aw_die "season expects YEAR and a season (winter, spring, summer, autumn)" ;;
+    case "$1" in
+        ''|*[!0-9]*) aw_die "season year must be numeric" ;;
     esac
     case "$2" in winter|spring|summer|autumn) ;; *) aw_die "season must be winter, spring, summer, or autumn" ;; esac
     aw_get "${ANIWATCH_API_URL}/seasons/$1/$2?limit=${ANIWATCH_LIMIT}"
