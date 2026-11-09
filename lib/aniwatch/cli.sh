@@ -11,7 +11,7 @@ Discovery:
   aniwatch season [YEAR SEASON]     Browse seasonal anime
   aniwatch info <id>                Show anime details
 
-Playback (URL must be accessible to yt-dlp):
+Playback (URL must be supported by yt-dlp):
   aniwatch watch <url> [quality] [sub|dub]
   aniwatch play <url> [quality] [sub|dub]
   aniwatch download <url> [quality] [sub|dub]
@@ -26,12 +26,11 @@ Mode:    sub (Japanese audio preference), dub (English audio preference)
 Dependencies:
   curl, jq        Metadata commands
   fzf             Interactive selection
-  yt-dlp          URL extraction and downloads
-  mpv             Playback (default)
+  yt-dlp          Stream extraction and downloads
+  mpv             Playback and Syncplay player
   syncplay        Synchronized viewing (optional)
 
 Configuration:
-  ANIWATCH_PLAYER=mpv
   ANIWATCH_QUALITY=best
   ANIWATCH_MODE=sub
   ANIWATCH_DOWNLOAD_DIR=.
@@ -40,6 +39,6 @@ Configuration:
 
 Jikan is a metadata provider, not a streaming provider. Playback depends
 on the URL being supported by yt-dlp and accessible to your account.
-No DRM or access-control bypass is performed.
+AniWatch does not bypass DRM or access controls.
 EOF
 }
