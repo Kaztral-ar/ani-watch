@@ -86,7 +86,6 @@ aw_hls_command() {
     aw_quality=${1:-$ANIWATCH_QUALITY}
     aw_referer=${2:-}
     aw_title=${3:-AniWatch}
-    aw_hls_select_variant "$aw_manifest" "$aw_quality" "$aw_referer" >/dev/null || aw_die "HLS manifest resolution failed"
     aw_play_hls "$aw_manifest" "$aw_quality" "$aw_referer" "$aw_title"
 }
 aw_hls_download_command() {
