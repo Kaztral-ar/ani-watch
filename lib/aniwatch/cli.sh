@@ -5,6 +5,7 @@ AniWatch — modular anime discovery and playback CLI
 
 Discovery:
   aniwatch search <query>           Search HiAnime titles
+  aniwatch                         Interactive anime/episode/server selection
   aniwatch metadata-search <query>   Search Jikan anime metadata
   aniwatch episodes <anime_id>      List HiAnime episodes
   aniwatch servers <episode_id>     List available server labels
@@ -46,6 +47,9 @@ Configuration:
 
 HLS commands inspect accessible master playlists and select a quality variant.
 Pass the provider-required Referer when a legitimate stream requires one.
+
+Interactive mode selects an anime, episode and server with fzf. It can
+play a server only when the response exposes a direct accessible URL.
 
 HiAnime search uses the site's HTML search page. Episode and server
 commands use its page endpoints. These unofficial endpoints may change
