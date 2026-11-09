@@ -81,7 +81,7 @@ The repository includes a responsive website with a dedicated **How it works** h
 - **Home:** explains the AniWatch workflow in three steps — Discover, Choose, Watch.
 - **Discover:** search anime titles, browse posters, filter by type, and view MyAnimeList community scores.
 - **Anime details:** open a title to see its synopsis, genres, score, status, episodes, studios, producers, and other metadata.
-- **Live data:** anime information is loaded from the public [Jikan API](https://jikan.moe/). Scores are MyAnimeList community ratings, not ratings submitted to AniWatch.
+- **Live data:** the website uses the [Tenrai API](https://api.tenrai.org/documentation), a public API with Jikan-compatible response schemas. Scores are MyAnimeList community ratings, not ratings submitted to AniWatch.
 
 ### Run the website locally
 
