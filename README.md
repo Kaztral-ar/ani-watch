@@ -21,7 +21,7 @@ AniWatch is a modular POSIX-shell anime discovery and playback CLI. It combines 
 
 - POSIX-compatible shell
 - `curl` and `jq`
-- `fzf` for interactive Jikan search
+- `fzf` for interactive HiAnime title selection
 - `yt-dlp` and `mpv` for playback and downloads
 - `syncplay` for synchronized sessions
 
