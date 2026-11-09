@@ -1,25 +1,30 @@
 # AniWatch
 
-AniWatch is a modular POSIX-shell anime discovery CLI. It brings a lightweight terminal workflow to Jikan/MyAnimeList metadata, with interactive selection through **fzf** and optional playback of direct media URLs through a local player.
+AniWatch is a modular POSIX-shell anime discovery and playback CLI. It combines Jikan/MyAnimeList metadata with **yt-dlp-compatible URL extraction**, MPV playback, local watch history, downloads and optional Syncplay sessions.
 
-> **Scope:** Jikan provides anime metadata, not episode streams. AniWatch does not currently scrape streaming providers, resolve episodes, or generate playback URLs. The `play` command accepts a direct media URL supplied by the user.
+> **Provider boundary:** Jikan is metadata-only. To watch or download, provide a media page URL supported by your installed yt-dlp version and accessible to your account. AniWatch does not scrape around authentication, bypass DRM, or host content.
 
 ## Features
 
-- Search anime titles and display scores, episode counts, and types.
-- Interactive search and title selection with fzf.
-- Browse popular anime and the current seasonal catalogue.
-- Browse a specific season by year and season name.
-- Discover a random anime and inspect full details, genres, and synopsis.
-- Play a direct HTTP(S) media URL with mpv or VLC.
-- Modular source, standalone build, and offline smoke tests.
+- Search, popular, random and seasonal anime discovery through Jikan.
+- Interactive title selection with fzf.
+- Play supported media URLs using MPV and yt-dlp.
+- Prefer Japanese audio (`sub`) or English audio (`dub`) when the source exposes language metadata.
+- Select best, worst, 360p, 480p, 720p or 1080p formats when available.
+- Download supported media with subtitles when supplied by the source.
+- Record watch history and resume the last URL.
+- Join a Syncplay room to synchronize playback with friends.
+- Modular POSIX shell source, standalone build and offline tests.
 
 ## Requirements
 
 - POSIX-compatible shell
-- `curl` and `jq` for metadata commands
-- `fzf` for interactive mode
-- `mpv` or VLC for direct URL playback
+- `curl` and `jq` for metadata
+- `fzf` for interactive search
+- `yt-dlp` and `mpv` for playback and downloads
+- `syncplay` for synchronized sessions
+
+Install dependencies using your platform's package manager. On Termux, package availability varies by repository; install compatible builds of yt-dlp and MPV.
 
 ## Install
 
@@ -29,7 +34,7 @@ cd ani-watch
 sudo make install
 ```
 
-Run from the checkout without installing:
+Run from checkout:
 
 ```sh
 sh bin/aniwatch help
@@ -38,42 +43,64 @@ sh bin/aniwatch help
 ## Usage
 
 ```sh
-# Interactive title search and selection (requires fzf)
-aniwatch
-
-# Search and list matching titles
+# Metadata discovery
 aniwatch search "Frieren"
-
-# Browse popular and currently airing-season catalogues
 aniwatch top
-aniwatch season
-
-# Browse a specific season
-aniwatch season 2025 fall
-
-# Random title and full metadata
 aniwatch random
+aniwatch season
+aniwatch season 2025 autumn
 aniwatch info 52991
 
-# Play a direct media URL
-aniwatch play "https://example.com/video.mp4"
+# Play a supported episode/page URL
+aniwatch watch "https://example.com/watch/episode" 1080p sub
+aniwatch watch "https://example.com/watch/episode" 720p dub
+
+# Download with chosen quality and audio preference
+aniwatch download "https://example.com/watch/episode" 1080p sub
+
+# Watch together (all participants need access to the same stream)
+aniwatch syncplay "https://example.com/video.mp4"
+
+# History
+aniwatch history
+aniwatch continue
+aniwatch history-clear
 ```
 
-Supported season names: `winter`, `spring`, `summer`, `autumn`.
+### Audio and quality behavior
+
+- `sub` prefers Japanese audio; `dub` prefers English audio.
+- The source must expose audio-language metadata for yt-dlp to select the intended track reliably.
+- Subtitle tracks are selected in MPV using English as the default preference. Downloads embed English subtitles when the source provides them.
+- Quality is a maximum-height preference; if the requested resolution is unavailable, yt-dlp may choose a lower available format.
+- MPV is used because it can hand supported sites to yt-dlp and consume the selected format. VLC is not currently the integrated yt-dlp playback backend.
+
+### Watch history
+
+History is stored locally at:
+
+```text
+$XDG_STATE_HOME/aniwatch/history.tsv
+```
+
+If `XDG_STATE_HOME` is unset, AniWatch uses `~/.local/state/aniwatch/`. Override the location with `ANIWATCH_STATE_DIR`. History contains timestamps, titles/URLs and media URLs; it is not uploaded.
+
+### Syncplay
+
+Syncplay synchronizes player state, not video files or provider access. Every participant must have access to a compatible stream and use a compatible player. Set a private or public server with `ANIWATCH_SYNCPLAY_SERVER`; the default is `syncplay.pl:8995`.
 
 ## Configuration
 
 | Variable | Default | Purpose |
 |---|---|---|
-| `ANIWATCH_API_URL` | `https://api.jikan.moe/v4` | Metadata API base URL |
-| `ANIWATCH_LIMIT` | `10` | Number of search/season results |
-| `ANIWATCH_PLAYER` | `mpv` | Preferred direct-URL player |
-
-Example:
-
-```sh
-ANIWATCH_LIMIT=20 aniwatch search "One Piece"
-```
+| `ANIWATCH_API_URL` | `https://api.jikan.moe/v4` | Metadata API |
+| `ANIWATCH_LIMIT` | `10` | Search/season result count |
+| `ANIWATCH_QUALITY` | `best` | Default playback/download quality |
+| `ANIWATCH_MODE` | `sub` | Default audio preference |
+| `ANIWATCH_DOWNLOAD_DIR` | `.` | Download destination |
+| `ANIWATCH_STATE_DIR` | `~/.local/state/aniwatch` | Local state directory |
+| `ANIWATCH_SYNCPLAY_SERVER` | `syncplay.pl:8995` | Syncplay server |
+| `ANIWATCH_PLAYER` | `mpv` | Reserved player preference |
 
 ## Development
 
@@ -83,37 +110,22 @@ make build
 sh dist/aniwatch help
 ```
 
-Source modules live in `lib/aniwatch/`. The standalone build is generated at `dist/aniwatch`.
+Source modules live in `lib/aniwatch/`; the standalone build is generated at `dist/aniwatch`.
 
 ## Comparison with upstream ani-cli
 
-AniWatch takes inspiration from the terminal-first workflow of [pystardust/ani-cli](https://github.com/pystardust/ani-cli), but it is a separate implementation and does not copy its GPL-3.0 source.
+AniWatch is a separate implementation inspired by the terminal workflow of [pystardust/ani-cli](https://github.com/pystardust/ani-cli). It does not copy upstream source code.
 
 | Capability | upstream ani-cli | AniWatch |
 |---|---|---|
-| Interactive terminal selection | fzf, rofi, dmenu | fzf |
-| Search and catalogue browsing | Provider-backed scraping | Jikan metadata API |
-| Episode resolution and streaming | Yes, provider dependent | Not implemented |
-| Sub/dub selection and quality | Yes | Not implemented |
-| Download and batch episodes | Yes | Not implemented |
-| Watch history / continue | Yes | Not implemented |
-| Syncplay / intro skip | Supported integrations | Not implemented |
-| Popular and seasonal discovery | Search/provider flow | Jikan top/current/specific season |
-| Modular shell source and build | Single main script | Split modules + standalone build |
-
-The upstream project has a broader playback feature set, including episode selection, quality selection, downloads, history, Syncplay, and intro skipping. AniWatch currently focuses on metadata discovery and a maintainable modular base. These playback features require a compatible streaming provider and are not falsely exposed as working commands here.
-
-## Project layout
-
-```text
-bin/aniwatch              CLI entry point
-lib/aniwatch/             Application modules
-scripts/build.sh          Standalone build script
-tests/run.sh              Offline smoke tests
-.github/workflows/ci.yml  CI checks
-Makefile                  Development and install targets
-LICENSE                   MIT license
-```
+| Anime search and selection | Provider scraping + fzf/rofi/dmenu | Jikan + fzf |
+| Episode streaming | Provider-specific resolver | yt-dlp-supported URLs |
+| Sub/dub | Provider-specific | Audio-language preference when exposed |
+| Quality selection | Yes | yt-dlp format selection |
+| Downloads | Yes | yt-dlp |
+| Watch history | Yes | Local URL history + continue |
+| Syncplay | Yes | Syncplay client integration |
+| Intro skip / release countdown | Yes | Not implemented |
 
 ## License
 
