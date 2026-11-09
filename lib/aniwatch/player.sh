@@ -8,10 +8,20 @@ aw_validate_url() {
 }
 
 aw_quality_format() {
-    case "$1" in
-        best) printf '%s' 'bestvideo*+bestaudio/best' ;;
-        worst) printf '%s' 'worstvideo*+worstaudio/worst' ;;
-        360p|480p|720p|1080p) printf 'bestvideo[height<=%s]+bestaudio/best[height<=%s]/best' "${1%p}" "${1%p}" ;;
+    aw_quality=$1
+    aw_mode=$2
+    case "$aw_mode" in
+        sub) aw_lang='ja' ;;
+        dub) aw_lang='en' ;;
+        *) aw_die "mode must be sub or dub" ;;
+    esac
+    case "$aw_quality" in
+        best) printf 'bestvideo*+bestaudio[language^=%s]/best' "$aw_lang" ;;
+        worst) printf 'worstvideo*+worstaudio[language^=%s]/worst' "$aw_lang" ;;
+        360p|480p|720p|1080p)
+            aw_height=${aw_quality%p}
+            printf 'bestvideo[height<=%s]+bestaudio[language^=%s]/best[height<=%s]' "$aw_height" "$aw_lang" "$aw_height"
+            ;;
         *) aw_die "quality must be best, worst, 360p, 480p, 720p, or 1080p" ;;
     esac
 }
@@ -22,17 +32,6 @@ aw_audio_language() {
         dub) printf '%s' 'en,eng' ;;
         *) aw_die "mode must be sub or dub" ;;
     esac
-}
-
-aw_prepare_media() {
-    aw_url=$1
-    aw_validate_url "$aw_url"
-    aw_format=$(aw_quality_format "$2")
-    aw_audio=$(aw_audio_language "$3")
-    aw_require yt-dlp
-    aw_resolved=$(yt-dlp --no-warnings --no-playlist --format "$aw_format" --get-url "$aw_url") ||
-        aw_die "could not resolve media URL; check source support and access"
-    [ -n "$aw_resolved" ] || aw_die "source returned no playable media"
 }
 
 aw_history_add() {
@@ -49,17 +48,13 @@ aw_play_url() {
     aw_url=$1
     aw_quality=${2:-$ANIWATCH_QUALITY}
     aw_mode=${3:-$ANIWATCH_MODE}
-    aw_prepare_media "$aw_url" "$aw_quality" "$aw_mode"
+    aw_validate_url "$aw_url"
+    aw_require yt-dlp
+    aw_require mpv
+    aw_format=$(aw_quality_format "$aw_quality" "$aw_mode")
     aw_audio=$(aw_audio_language "$aw_mode")
     aw_history_add "$aw_url" "$aw_url"
-    case "$ANIWATCH_PLAYER" in
-        mpv)
-            mpv --force-media-title="$aw_url" --alang="$aw_audio" --slang="en,eng" "$aw_url"
-            ;;
-        *)
-            "$ANIWATCH_PLAYER" "$aw_url"
-            ;;
-    esac
+    mpv --ytdl-format="$aw_format" --alang="$aw_audio" --slang="en,eng" "$aw_url"
 }
 
 aw_download_url() {
@@ -67,13 +62,11 @@ aw_download_url() {
     aw_quality=${2:-$ANIWATCH_QUALITY}
     aw_mode=${3:-$ANIWATCH_MODE}
     aw_validate_url "$aw_url"
-    aw_format=$(aw_quality_format "$aw_quality")
-    aw_audio=$(aw_audio_language "$aw_mode")
     aw_require yt-dlp
+    aw_format=$(aw_quality_format "$aw_quality" "$aw_mode")
     mkdir -p "$ANIWATCH_DOWNLOAD_DIR" || aw_die "cannot create download directory"
     yt-dlp --no-playlist --format "$aw_format" \
-        --extractor-args "generic:impersonate" \
-        --embed-subs --write-subs --sub-langs "en,eng" \
+        --write-subs --write-auto-subs --sub-langs "en,eng" --embed-subs \
         --output "$ANIWATCH_DOWNLOAD_DIR/%(title).180B [%(id)s].%(ext)s" "$aw_url"
 }
 
@@ -104,6 +97,6 @@ aw_syncplay_url() {
     aw_url=$1
     aw_validate_url "$aw_url"
     aw_require syncplay
-    aw_require "$ANIWATCH_PLAYER"
-    syncplay --no-gui --player-path "$ANIWATCH_PLAYER" --host "$ANIWATCH_SYNCPLAY_SERVER" "$aw_url"
+    aw_require mpv
+    syncplay --no-gui --player-path "$(command -v mpv)" --host "$ANIWATCH_SYNCPLAY_SERVER" "$aw_url"
 }
