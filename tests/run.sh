@@ -95,17 +95,23 @@ cat > "$tmpdir/bin/mpv" <<'MOCK'
 printf '%s\n' "$@" > "$MOCK_MPV_ARGS"
 exit "${MOCK_MPV_EXIT:-0}"
 MOCK
+cat > "$tmpdir/bin/ffmpeg" <<'MOCK'
+#!/bin/sh
+printf '%s\\n' "$@" > "$MOCK_FFMPEG_ARGS"
+exit 0
+MOCK
 cat > "$tmpdir/bin/yt-dlp" <<'MOCK'
 #!/bin/sh
 last=
 for arg do last=$arg; done
-case "$last" in *fail*) exit 7 ;; *) exit 0 ;; esac
+case "$last" in *fail*|*.m3u8*) exit 7 ;; *) exit 0 ;; esac
 MOCK
-chmod +x "$tmpdir/bin/mpv" "$tmpdir/bin/yt-dlp"
+chmod +x "$tmpdir/bin/mpv" "$tmpdir/bin/yt-dlp" "$tmpdir/bin/ffmpeg"
 PATH="$tmpdir/bin:$PATH"
 export PATH
 MOCK_MPV_ARGS="$tmpdir/mpv.args"
-export MOCK_MPV_ARGS
+MOCK_FFMPEG_ARGS="$tmpdir/ffmpeg.args"
+export MOCK_MPV_ARGS MOCK_FFMPEG_ARGS
 ANIWATCH_STATE_DIR="$tmpdir/state"
 ANIWATCH_HISTORY="$ANIWATCH_STATE_DIR/history.tsv"
 ANIWATCH_DOWNLOAD_DIR="$tmpdir/downloads"
@@ -136,10 +142,11 @@ grep -q -- '--' "$MOCK_MPV_ARGS"
 grep -q 'https://cdn.example.test/episode.mp4' "$MOCK_MPV_ARGS"
 
 # Continue must resume a direct media URL with its Referer, not treat it as HLS.
-aw_history_add "https://cdn.example.test/direct.mp4" "Frieren Episode 3" "frieren" "3" "https://hianime.at"
+aw_history_add "https://cdn.example.test/direct.mp4" "Frieren Episode 3" "frieren" "3" "https://hianime.at" "dub"
 aw_history_continue
 grep -q -- '--referrer=https://hianime.at' "$MOCK_MPV_ARGS"
 grep -q 'https://cdn.example.test/direct.mp4' "$MOCK_MPV_ARGS"
+grep -q -- '--alang=en,eng' "$MOCK_MPV_ARGS"
 
 # HLS playback receives the master playlist (including alternate audio metadata).
 aw_play_hls "https://cdn.example.test/master.m3u8" 720p "https://hianime.at" "Frieren" "frieren" "3" "" dub
@@ -149,6 +156,13 @@ if grep -q 'https://cdn.example.test/high/index.m3u8' "$MOCK_MPV_ARGS"; then
     exit 1
 fi
 grep -q -- '--ytdl-format=' "$MOCK_MPV_ARGS"
+
+# ffmpeg receives a real CRLF-terminated Referer header when yt-dlp falls back.
+if MOCK_YTDLP_EXIT=1 aw_download_hls "https://cdn.example.test/fallback.m3u8" 720p "https://hianime.at" "Fallback"; then
+    :
+fi
+grep -F "Referer: https://hianime.at" "$MOCK_FFMPEG_ARGS" >/dev/null
+grep -F "$(printf '\\r')" "$MOCK_FFMPEG_ARGS" >/dev/null
 
 # The master URL's separate audio rendition remains in the source manifest.
 # Bulk failures are isolated to their own episode and only successful downloads count.
