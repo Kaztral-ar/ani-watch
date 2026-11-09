@@ -1,79 +1,126 @@
-# ani-watch (modular layout)
+# AniWatch
 
-A restructured [ani-cli](https://github.com/Kaztral-ar/ani-watch) v5.1.7: same behaviour, split into small
-modules with consistent names, tests, and a single-file build. GPL-3.0-or-later (see `LICENSE`).
+A modular, POSIX shell-based command-line anime browser and player, based on the `ani-cli` v5.1.7 codebase. This repository keeps the original implementation, module layout, tests, build scripts, and licensing while presenting the project under the **AniWatch** name.
 
-## Use
+> **Compatibility note:** The command-line executable and its existing options retain the `ani-cli` name for compatibility with the source code. The GitHub project/repository is named **ani-watch**.
+
+Licensed under **GPL-3.0-or-later**. See [LICENSE](LICENSE).
+
+## Features
+
+- Search and browse anime from the configured provider.
+- Select episodes and stream them through supported media players.
+- Choose video quality and resolve playback links.
+- Maintain viewing history and continue from saved progress.
+- Download episodes when the required tools are available.
+- Display next-episode scheduling information.
+- Build a portable, single-file shell script from the modular source.
+- Run offline unit and end-to-end tests with mocked network/player commands.
+
+## Requirements
+
+Required tools:
+
+- `curl`
+- `sed`, `grep`, and `awk`
+- `fzf` (or a supported menu alternative such as `rofi` or `dmenu`)
+- `mpv` or VLC
+
+Optional tools include `yt-dlp`, `ffmpeg`, `ani-skip`, and `syncplay`, depending on the features you use.
+
+## Quick start
+
+Run directly from the repository:
 
 ```sh
-make build              # -> dist/ani-cli (one portable POSIX sh file)
-sudo make install       # PREFIX=/usr/local by default
-sh bin/ani-cli          # run straight from the checkout, no build needed
-make test               # unit + end-to-end tests under sh, dash, bash (offline, mocked HTTP)
-make lint               # shellcheck
+sh bin/ani-cli
 ```
 
-Requires `curl`, `sed`, `grep`, `awk`, `fzf` (or rofi/dmenu) and `mpv` or VLC. Optional: `yt-dlp`/`ffmpeg`
-(downloads), `ani-skip`, `syncplay`. Run `ani-cli -h` for options. All `ANI_CLI_*` environment variables from
-upstream are unchanged.
+Show available options:
 
-## Layout
-
-```
-bin/ani-cli               dev entry point: sources lib/ani-cli/*.sh then runs main
-dist/ani-cli              generated single-file build (what you install)
-lib/ani-cli/MODULES       load order; the only list of modules (used by bin/ and scripts/build.sh)
-  core.sh                 die/info/warn, require_cmd, first_available, TAB/NL
-  config.sh               defaults + ANI_CLI_* env, platform detection, curl/player selection
-  util.sh                 is_uint, url_encode, normalize_title
-  http.sh                 http_fetch (the only place that calls curl for scraping)
-  decode.sh               b64_decode, decode_embed_blob (XOR)
-  provider_hianime.sh     provider_search / provider_episodes / provider_resolve_stream  <- site-specific
-  quality.sh              select_quality, resolve_video_link
-  episodes.sh             episode_next/prev/range/exists, resolve_episode_selection
-  history.sh              history_* (init, migrate, save, pending list)
-  ui.sh                   menu, select_from_list, number_lines
-  player.sh               play_episode, play_selection, one player_* function per player, download_episode
-  schedule.sh             next-episode countdown (-N)
-  update.sh               self_update (-U, bundled build only)
-  cli.sh                  cli_parse_args, cli_usage
-  main.sh                 main + the load_*/playback_loop flow
-scripts/build.sh          bundles the modules
-tests/                    harness, mock curl/menu/player/ffmpeg, fixtures generator, unit + e2e tests
+```sh
+sh bin/ani-cli -h
 ```
 
-## Naming (old -> new)
+Build the standalone version:
 
-| upstream | here |
-|---|---|
-| `hianime_curl` | `http_fetch` |
-| `hianime_search` / `hianime_episodes` / `hianime_m3u8` | `provider_search` / `provider_episodes` / `provider_resolve_stream` |
-| `deobfuscate_blob` | `decode_embed_blob` |
-| `get_video_link` | `resolve_video_link` |
-| `nth` | `select_from_list` |
-| `dep_ch` / `dep_ch_failover` | `require_cmd` / `first_available` |
-| `play` / `play_episode` | `play_selection` / `play_episode` |
-| `update_history` / `backup_old_hist` / `process_hist_entry` | `history_save` / `history_migrate` / `history_next_entry` |
-| `time_until_next_ep` / `update_script` | `show_next_episode_schedule` / `self_update` |
-| globals `ep_no`, `links`, `refr` ... | `EP_NO`, `STREAM_LINKS`, `REFERER` ... (UPPER_SNAKE) |
+```sh
+make build
+```
 
-## Supporting another site
+The generated executable is written to:
 
-Replace the three `provider_*` functions in `provider_hianime.sh` (contracts are in the file header); everything
-else (menus, history, players, download) is site-independent. Add the fixtures to `tests/make_fixtures.py`.
+```
+dist/ani-cli
+```
 
-## Changes from upstream behaviour
+Install system-wide (the default prefix is `/usr/local`):
 
-- Search terms are percent-encoded (`&`, `#`, `%`, non-ASCII no longer break the URL).
-- Episode, history and menu lookups use exact string comparison (awk) instead of regexes built from user
-  data: `1.5`, `15` and `1x5` can no longer be confused, and titles with `& | \` are stored safely.
-- `-h`, `-V` and `-D` work without a player or curl installed; first action flag wins.
-- `download` honours multiple `ANI_CLI_PLAYER_FLAGS`; EOF at the search prompt exits instead of looping.
-- `-U` only operates on the bundled build and takes its source from `ANI_CLI_UPDATE_URL` (default: upstream).
-- Next-episode countdown uses `curl --data-urlencode`.
+```sh
+sudo make install
+```
 
-## Known limits
+## Development
 
-The live site is the fragile part: the regexes in `provider_hianime.sh` and the XOR key in `decode.sh` are copied
-verbatim from upstream and were verified only against synthetic fixtures that follow the same markup, not the
-live site. If it changes, fix those two files.
+Run the test suite:
+
+```sh
+make test
+```
+
+Run shell linting (requires ShellCheck):
+
+```sh
+make lint
+```
+
+The tests include unit and end-to-end coverage under `sh`, `dash`, and `bash`, using mocked HTTP, menu, player, and media-tool commands. The test suite is designed to run offline.
+
+## Project structure
+
+```text
+ani-watch/
+├── bin/
+│   └── ani-cli                 # Development entry point
+├── dist/
+│   └── ani-cli                 # Generated standalone build
+├── lib/
+│   └── ani-cli/
+│       ├── MODULES             # Central module load order
+│       ├── core.sh             # Common helpers and command checks
+│       ├── config.sh           # Defaults, environment and platform setup
+│       ├── util.sh             # String and URL utilities
+│       ├── http.sh             # HTTP fetching
+│       ├── decode.sh           # Embed decoding helpers
+│       ├── provider_hianime.sh # Provider-specific search and stream resolution
+│       ├── quality.sh          # Quality selection and link resolution
+│       ├── episodes.sh         # Episode selection and navigation
+│       ├── history.sh          # Watch-history management
+│       ├── ui.sh               # Menus and terminal selection
+│       ├── player.sh           # Playback and download functions
+│       ├── schedule.sh         # Next-episode countdown
+│       ├── update.sh           # Self-update support for bundled builds
+│       ├── cli.sh              # Argument parsing and help
+│       └── main.sh             # Application entry point and main flow
+├── scripts/
+│   └── build.sh                # Creates the standalone build
+├── tests/                      # Unit and end-to-end test suite
+├── Makefile
+└── LICENSE
+```
+
+## Configuration
+
+Existing `ANI_CLI_*` environment variables are retained. The original command options and configuration names remain unchanged to avoid breaking existing scripts and user setups.
+
+## Extending the provider
+
+Provider-specific behaviour is isolated in `lib/ani-cli/provider_hianime.sh`. To adapt the project to another site, implement the provider search, episode-list, and stream-resolution functions while keeping their existing contracts. The rest of the application—menus, history, playback, and downloads—is designed to remain provider-independent.
+
+## Notes and limitations
+
+The provider integration depends on the remote site's page structure and embed decoding behaviour. Site changes may require updates to `provider_hianime.sh` and `decode.sh`. Validate provider changes against the live service as well as the synthetic fixtures in the test suite.
+
+## Credits
+
+This project is based on [pystardust/ani-cli](https://github.com/pystardust/ani-cli). Original upstream licensing and notices are retained in the repository.
