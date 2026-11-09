@@ -1,5 +1,5 @@
 #!/bin/sh
-set -eu
+set -eux
 ROOT=$(CDPATH='' cd -- "$(dirname -- "$0")/.." && pwd)
 BIN="$ROOT/bin/aniwatch"
 TEST_SHELL=${TEST_SHELL:-sh}
