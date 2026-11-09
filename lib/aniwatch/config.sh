@@ -1,6 +1,7 @@
 #!/bin/sh
 
 : "${ANIWATCH_API_URL:=https://api.jikan.moe/v4}"
+: "${ANIWATCH_HIANIME_BASE:=https://hianime.at}"
 : "${ANIWATCH_LIMIT:=10}"
 : "${ANIWATCH_MENU:=fzf}"
 : "${ANIWATCH_QUALITY:=best}"
@@ -9,7 +10,7 @@
 : "${ANIWATCH_STATE_DIR:=${XDG_STATE_HOME:-$HOME/.local/state}/aniwatch}"
 : "${ANIWATCH_HISTORY:=${ANIWATCH_STATE_DIR}/history.tsv}"
 : "${ANIWATCH_SYNCPLAY_SERVER:=syncplay.pl:8995}"
-export ANIWATCH_API_URL ANIWATCH_LIMIT ANIWATCH_MENU
+export ANIWATCH_API_URL ANIWATCH_HIANIME_BASE ANIWATCH_LIMIT ANIWATCH_MENU
 export ANIWATCH_QUALITY ANIWATCH_MODE ANIWATCH_DOWNLOAD_DIR
 export ANIWATCH_STATE_DIR ANIWATCH_HISTORY ANIWATCH_SYNCPLAY_SERVER
 
@@ -23,7 +24,5 @@ aw_check_deps() {
 
 aw_check_media_deps() {
     aw_require yt-dlp
-    if ! command -v "$ANIWATCH_PLAYER" >/dev/null 2>&1; then
-        aw_die "player '$ANIWATCH_PLAYER' not found; install mpv or set ANIWATCH_PLAYER"
-    fi
+    aw_require mpv
 }
