@@ -38,7 +38,7 @@ aw_hianime_episodes() {
 }
 
 aw_hianime_parse_episodes() {
-    printf '%s' "$1" | sed 's|ep-item|\nep-item|g' |
+    printf '%s\n' "$1" | sed 's|ep-item|\nep-item|g' |
     while IFS= read -r aw_item; do
         aw_number=$(printf '%s' "$aw_item" | sed -nE 's|.*data-number="([^"]*)".*|\1|p')
         aw_id=$(printf '%s' "$aw_item" | sed -nE 's|.*data-id="([0-9]+)".*|\1|p')
@@ -57,7 +57,7 @@ aw_hianime_servers() {
 }
 
 aw_hianime_parse_servers() {
-    printf '%s' "$1" | sed 's|server-item|\nserver-item|g' |
+    printf '%s\n' "$1" | sed 's|server-item|\nserver-item|g' |
     while IFS= read -r aw_item; do
         aw_type=$(printf '%s' "$aw_item" | sed -nE 's|.*data-type="([^"]*)".*|\1|p')
         aw_name=$(printf '%s' "$aw_item" | sed -nE 's|.*data-server-name="([^"]*)".*|\1|p')
