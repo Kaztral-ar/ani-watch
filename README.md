@@ -58,6 +58,20 @@ cd ani-watch
 
 Open the interactive interface and search for your anime on HiAnime.
 
+### Install as a system command (optional)
+
+The install target builds a self-contained executable before installing it:
+
+```sh
+make install PREFIX="$HOME/.local"
+```
+
+Ensure `$HOME/.local/bin` is on your `PATH`. To uninstall:
+
+```sh
+make uninstall PREFIX="$HOME/.local"
+```
+
 ---
 
 ## 📦 Installation
