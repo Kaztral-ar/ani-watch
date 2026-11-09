@@ -15,6 +15,8 @@ if sh "$BIN" play not-a-url >/dev/null 2>&1; then echo "Expected invalid media U
 if sh "$BIN" watch https://example.com/video.mp4 ultra >/dev/null 2>&1; then echo "Expected invalid quality to fail" >&2; exit 1; fi
 if sh "$BIN" watch https://example.com/video.mp4 best raw >/dev/null 2>&1; then echo "Expected invalid audio mode to fail" >&2; exit 1; fi
 if sh "$BIN" syncplay not-a-url >/dev/null 2>&1; then echo "Expected invalid Syncplay URL to fail" >&2; exit 1; fi
+if sh "$BIN" bulk-download demo invalid >/dev/null 2>&1; then echo "Expected invalid bulk episode range to fail" >&2; exit 1; fi
+if sh "$BIN" bulk-download demo 5-2 >/dev/null 2>&1; then echo "Expected reversed bulk episode range to fail" >&2; exit 1; fi
 
 . "$ROOT/lib/aniwatch/core.sh"
 . "$ROOT/lib/aniwatch/config.sh"
