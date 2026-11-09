@@ -35,80 +35,115 @@ aw_audio_language() {
 }
 
 aw_history_add() {
-    aw_url=$1
-    aw_title=$2
-    aw_anime_id=${3:-}
-    aw_episode=${4:-}
-    aw_referer=${5:-}
+    aw_h_url=$1
+    aw_h_title=$2
+    aw_h_anime_id=${3:-}
+    aw_h_episode=${4:-}
+    aw_h_referer=${5:-}
+    umask 077
     mkdir -p "$ANIWATCH_STATE_DIR" || aw_die "cannot create state directory"
-    aw_now=$(date '+%Y-%m-%dT%H:%M:%S%z')
-    aw_safe_title=$(printf '%s' "$aw_title" | tr '\t\r\n' '   ')
-    aw_safe_url=$(printf '%s' "$aw_url" | tr '\t\r\n' '   ')
-    aw_safe_anime=$(printf '%s' "$aw_anime_id" | tr '\t\r\n' '   ')
-    aw_safe_episode=$(printf '%s' "$aw_episode" | tr '\t\r\n' '   ')
-    aw_safe_referer=$(printf '%s' "$aw_referer" | tr '\t\r\n' '   ')
-    printf '%s\t%s\t%s\t%s\t%s\t%s\n' "$aw_now" "$aw_safe_anime" "$aw_safe_episode" "$aw_safe_title" "$aw_safe_url" "$aw_safe_referer" >> "$ANIWATCH_HISTORY"
+    aw_h_now=$(date '+%Y-%m-%dT%H:%M:%S%z')
+    aw_h_safe_title=$(printf '%s' "$aw_h_title" | tr '\t\r\n' '   ')
+    aw_h_safe_url=$(printf '%s' "$aw_h_url" | tr '\t\r\n' '   ')
+    aw_h_safe_anime=$(printf '%s' "$aw_h_anime_id" | tr '\t\r\n' '   ')
+    aw_h_safe_episode=$(printf '%s' "$aw_h_episode" | tr '\t\r\n' '   ')
+    aw_h_safe_referer=$(printf '%s' "$aw_h_referer" | tr '\t\r\n' '   ')
+    printf '%s\t%s\t%s\t%s\t%s\t%s\n' "$aw_h_now" "$aw_h_safe_anime" "$aw_h_safe_episode" "$aw_h_safe_title" "$aw_h_safe_url" "$aw_h_safe_referer" >> "$ANIWATCH_HISTORY"
+    chmod 600 "$ANIWATCH_HISTORY" 2>/dev/null || :
+    aw_h_tmp="$ANIWATCH_HISTORY.tmp"
+    if [ "$(wc -l < "$ANIWATCH_HISTORY" | tr -d ' ')" -gt 500 ]; then
+        tail -n 500 "$ANIWATCH_HISTORY" > "$aw_h_tmp" && mv "$aw_h_tmp" "$ANIWATCH_HISTORY"
+        chmod 600 "$ANIWATCH_HISTORY" 2>/dev/null || :
+    fi
 }
 
 aw_aniskip_flags() {
-    aw_mal_id=$1
-    aw_episode_no=$2
+    aw_skip_mal_id=$1
+    aw_skip_episode_no=$2
     [ "$ANIWATCH_SKIP_INTRO" = "1" ] || return 1
-    [ -n "$aw_mal_id" ] && [ -n "$aw_episode_no" ] || return 1
+    [ -n "$aw_skip_mal_id" ] && [ -n "$aw_skip_episode_no" ] || return 1
     command -v ani-skip >/dev/null 2>&1 || return 1
-    ani-skip -i "$aw_mal_id" -e "$aw_episode_no" 2>/dev/null
+    ani-skip -i "$aw_skip_mal_id" -e "$aw_skip_episode_no" 2>/dev/null
 }
 
 aw_play_url() {
-    aw_url=$1
-    aw_quality=${2:-$ANIWATCH_QUALITY}
-    aw_mode=${3:-$ANIWATCH_MODE}
-    aw_title=${4:-AniWatch}
-    aw_mal_id=${5:-}
-    aw_episode_no=${6:-}
-    aw_referer=${7:-}
-    aw_validate_url "$aw_url"
-    aw_history_add "$aw_url" "$aw_title" "$aw_mal_id" "$aw_episode_no" "$aw_referer"
+    aw_play_url_value=$1
+    aw_play_quality=${2:-$ANIWATCH_QUALITY}
+    aw_play_mode=${3:-$ANIWATCH_MODE}
+    aw_play_title=${4:-AniWatch}
+    aw_play_mal_id=${5:-}
+    aw_play_episode_no=${6:-}
+    aw_play_referer=${7:-}
+    aw_validate_url "$aw_play_url_value"
     case "$ANIWATCH_PLAYER" in
         mpv)
             aw_require mpv
             aw_require yt-dlp
-            aw_format=$(aw_quality_format "$aw_quality" "$aw_mode")
-            aw_audio=$(aw_audio_language "$aw_mode")
-            aw_skip_flags=$(aw_aniskip_flags "$aw_mal_id" "$aw_episode_no" || :)
-            if [ -n "$aw_skip_flags" ]; then
-                # ani-skip emits MPV command-line options; split those options into argv.
-                # shellcheck disable=SC2086
-                if [ -n "$aw_referer" ]; then mpv $aw_skip_flags --referrer="$aw_referer" --force-media-title="$aw_title" --ytdl-format="$aw_format" --alang="$aw_audio" --slang="en,eng" "$aw_url"; else mpv $aw_skip_flags --force-media-title="$aw_title" --ytdl-format="$aw_format" --alang="$aw_audio" --slang="en,eng" "$aw_url"; fi
+            aw_play_format=$(aw_quality_format "$aw_play_quality" "$aw_play_mode")
+            aw_play_audio=$(aw_audio_language "$aw_play_mode")
+            aw_play_skip_flags=$(aw_aniskip_flags "$aw_play_mal_id" "$aw_play_episode_no" || :)
+            if [ -n "$aw_play_skip_flags" ]; then
+                # ani-skip emits MPV options. Disable pathname expansion while splitting them.
+                case $- in
+                    *f*) aw_play_noglob=1 ;;
+                    *) aw_play_noglob=0; set -f ;;
+                esac
+                if [ -n "$aw_play_referer" ]; then
+                    mpv $aw_play_skip_flags --referrer="$aw_play_referer" --force-media-title="$aw_play_title" --ytdl-format="$aw_play_format" --alang="$aw_play_audio" --slang="en,eng" -- "$aw_play_url_value"
+                    aw_play_status=$?
+                else
+                    mpv $aw_play_skip_flags --force-media-title="$aw_play_title" --ytdl-format="$aw_play_format" --alang="$aw_play_audio" --slang="en,eng" -- "$aw_play_url_value"
+                    aw_play_status=$?
+                fi
+                [ "$aw_play_noglob" -eq 1 ] || set +f
             else
                 [ "$ANIWATCH_SKIP_INTRO" != "1" ] || aw_info "Ani-Skip unavailable or no skip data for this episode"
-                if [ -n "$aw_referer" ]; then mpv --referrer="$aw_referer" --force-media-title="$aw_title" --ytdl-format="$aw_format" --alang="$aw_audio" --slang="en,eng" "$aw_url"; else mpv --force-media-title="$aw_title" --ytdl-format="$aw_format" --alang="$aw_audio" --slang="en,eng" "$aw_url"; fi
+                if [ -n "$aw_play_referer" ]; then
+                    mpv --referrer="$aw_play_referer" --force-media-title="$aw_play_title" --ytdl-format="$aw_play_format" --alang="$aw_play_audio" --slang="en,eng" -- "$aw_play_url_value"
+                    aw_play_status=$?
+                else
+                    mpv --force-media-title="$aw_play_title" --ytdl-format="$aw_play_format" --alang="$aw_play_audio" --slang="en,eng" -- "$aw_play_url_value"
+                    aw_play_status=$?
+                fi
             fi
             ;;
         vlc)
             aw_require vlc
             [ "$ANIWATCH_SKIP_INTRO" != "1" ] || aw_info "Ani-Skip integration is MPV-only"
-            if [ -n "$aw_referer" ]; then
-                vlc --http-referrer="$aw_referer" --meta-title="$aw_title" "$aw_url"
+            if [ -n "$aw_play_referer" ]; then
+                vlc --http-referrer="$aw_play_referer" --meta-title="$aw_play_title" -- "$aw_play_url_value"
+                aw_play_status=$?
             else
-                vlc --meta-title="$aw_title" "$aw_url"
+                vlc --meta-title="$aw_play_title" -- "$aw_play_url_value"
+                aw_play_status=$?
             fi
             ;;
         *) aw_die "ANIWATCH_PLAYER must be mpv or vlc" ;;
     esac
+    if [ "$aw_play_status" -eq 0 ]; then
+        aw_history_add "$aw_play_url_value" "$aw_play_title" "$aw_play_mal_id" "$aw_play_episode_no" "$aw_play_referer"
+    fi
+    return "$aw_play_status"
 }
 
 aw_download_url() {
-    aw_url=$1
-    aw_quality=${2:-$ANIWATCH_QUALITY}
-    aw_mode=${3:-$ANIWATCH_MODE}
-    aw_validate_url "$aw_url"
+    aw_download_url_value=$1
+    aw_download_quality=${2:-$ANIWATCH_QUALITY}
+    aw_download_mode=${3:-$ANIWATCH_MODE}
+    aw_validate_url "$aw_download_url_value"
     aw_require yt-dlp
-    aw_format=$(aw_quality_format "$aw_quality" "$aw_mode")
+    aw_download_format=$(aw_quality_format "$aw_download_quality" "$aw_download_mode")
     mkdir -p "$ANIWATCH_DOWNLOAD_DIR" || aw_die "cannot create download directory"
-    yt-dlp --no-playlist --format "$aw_format" \
-        --write-subs --write-auto-subs --sub-langs "en,eng" --embed-subs \
-        --output "$ANIWATCH_DOWNLOAD_DIR/%(title).180B [%(id)s].%(ext)s" "$aw_url"
+    if command -v ffmpeg >/dev/null 2>&1; then
+        yt-dlp --no-playlist --format "$aw_download_format" \
+            --write-subs --write-auto-subs --sub-langs "en,eng" --embed-subs \
+            --output "$ANIWATCH_DOWNLOAD_DIR/%(title).180B [%(id)s].%(ext)s" -- "$aw_download_url_value"
+    else
+        aw_info "ffmpeg not found; subtitles will be downloaded but not embedded"
+        yt-dlp --no-playlist --format "$aw_download_format" \
+            --write-subs --write-auto-subs --sub-langs "en,eng" \
+            --output "$ANIWATCH_DOWNLOAD_DIR/%(title).180B [%(id)s].%(ext)s" -- "$aw_download_url_value"
+    fi
 }
 
 aw_history_list() {
@@ -121,17 +156,22 @@ aw_history_list() {
 
 aw_history_continue() {
     [ -s "$ANIWATCH_HISTORY" ] || aw_die "watch history is empty"
-    aw_last=$(tail -n 1 "$ANIWATCH_HISTORY")
-    aw_fields=$(printf '%s\n' "$aw_last" | awk -F '\t' '{print NF}')
-    if [ "$aw_fields" -ge 5 ]; then
-        aw_url=$(printf '%s\n' "$aw_last" | cut -f 5)
-        aw_referer=$(printf '%s\n' "$aw_last" | cut -f 6)
+    aw_continue_last=$(tail -n 1 "$ANIWATCH_HISTORY")
+    aw_continue_fields=$(printf '%s\n' "$aw_continue_last" | awk -F '\t' '{print NF}')
+    if [ "$aw_continue_fields" -ge 5 ]; then
+        aw_continue_url=$(printf '%s\n' "$aw_continue_last" | cut -f 5)
+        aw_continue_referer=$(printf '%s\n' "$aw_continue_last" | cut -f 6)
+        aw_continue_title=$(printf '%s\n' "$aw_continue_last" | cut -f 4)
     else
-        aw_url=$(printf '%s\n' "$aw_last" | cut -f 3-)
-        aw_referer=
+        aw_continue_url=$(printf '%s\n' "$aw_continue_last" | cut -f 3-)
+        aw_continue_referer=
+        aw_continue_title="Continue watching"
     fi
-    [ -n "$aw_url" ] || aw_die "last history entry has no URL"
-    if [ -n "$aw_referer" ]; then aw_play_hls "$aw_url" "$ANIWATCH_QUALITY" "$aw_referer" "Continue watching"; else aw_play_url "$aw_url"; fi
+    [ -n "$aw_continue_url" ] || aw_die "last history entry has no URL"
+    case "$aw_continue_url" in
+        *.m3u8*|*.m3u*) aw_play_hls "$aw_continue_url" "$ANIWATCH_QUALITY" "$aw_continue_referer" "$aw_continue_title" ;;
+        *) aw_play_url "$aw_continue_url" "$ANIWATCH_QUALITY" "$ANIWATCH_MODE" "$aw_continue_title" "" "" "$aw_continue_referer" ;;
+    esac
 }
 
 aw_history_clear() {
@@ -142,9 +182,9 @@ aw_history_clear() {
 }
 
 aw_syncplay_url() {
-    aw_url=$1
-    aw_validate_url "$aw_url"
+    aw_sync_url=$1
+    aw_validate_url "$aw_sync_url"
     aw_require syncplay
     aw_require mpv
-    syncplay --no-gui --player-path "$(command -v mpv)" --host "$ANIWATCH_SYNCPLAY_SERVER" "$aw_url"
+    syncplay --no-gui --player-path "$(command -v mpv)" --host "$ANIWATCH_SYNCPLAY_SERVER" -- "$aw_sync_url"
 }
