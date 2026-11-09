@@ -10,6 +10,7 @@ AniWatch is a modular POSIX-shell anime discovery and playback CLI. It combines 
 - Search HiAnime titles and list episodes and server labels.
 - Browse popular, random and seasonal anime through Jikan.
 - Play supported media URLs using MPV and yt-dlp.
+- Inspect accessible HLS master playlists, select best/worst or capped resolution, and pass a required HTTP Referer to MPV/yt-dlp.
 - Prefer Japanese audio (`sub`) or English audio (`dub`) when the source exposes language metadata.
 - Select best, worst, 360p, 480p, 720p or 1080p formats when available.
 - Download supported media with subtitles when supplied by the source.
@@ -62,6 +63,12 @@ aniwatch watch "https://example.com/watch/episode" 1080p sub
 aniwatch watch "https://example.com/watch/episode" 720p dub
 aniwatch download "https://example.com/watch/episode" 1080p sub
 
+# Play an accessible HLS master playlist, optionally with a provider Referer
+aniwatch hls "https://cdn.example.com/master.m3u8" 720p "https://provider.example/" "Anime Episode 1"
+
+# Download an accessible HLS playlist
+aniwatch hls-download "https://cdn.example.com/master.m3u8" best "https://provider.example/"
+
 # Watch together
 aniwatch syncplay "https://example.com/video.mp4"
 
@@ -71,7 +78,7 @@ aniwatch continue
 aniwatch history-clear
 ```
 
-The HiAnime search command prints a slug and title. Pass that slug to `episodes`; pass an episode ID from that output to `servers`. The server command displays the available server labels and type only. It does not resolve embedded players into direct stream URLs.
+The HLS resolver supports accessible master playlists and relative variant URLs. It does not resolve HiAnime server IDs into protected or obfuscated embed streams. The HiAnime search command prints a slug and title. Pass that slug to `episodes`; pass an episode ID from that output to `servers`. The server command displays the available server labels and type only. It does not resolve embedded players into direct stream URLs.
 
 ### Audio and quality behavior
 
@@ -116,10 +123,10 @@ AniWatch is an independent implementation inspired by the terminal workflow of [
 | Anime search | HiAnime HTML search | HiAnime HTML search + Jikan |
 | Episode list | HiAnime episode endpoint | HiAnime episode endpoint |
 | Server list | HiAnime server endpoint + provider resolver | HiAnime server labels only |
-| Direct stream resolution | Provider-specific embed resolver | Not implemented |
-| Sub/dub | Provider server selection | Audio-language preference for supplied URLs |
-| Quality | Provider/HLS selection | yt-dlp format selection |
-| Downloads | Yes | yt-dlp for supported URLs |
+| Direct stream resolution | Provider-specific embed resolver | Generic accessible HLS manifest resolver; no provider embed decryption |
+| Sub/dub | Provider server selection | Audio-language preference for supplied URLs; provider selection pending |
+| Quality | Provider/HLS selection | HLS variant selection + yt-dlp format selection |
+| Downloads | yt-dlp / ffmpeg fallback | yt-dlp for supported URLs and HLS variants |
 | Watch history | Episode-aware | Local URL history |
 | Syncplay | Yes | Syncplay client integration |
 
