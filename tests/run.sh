@@ -126,7 +126,7 @@ aw_history_add "https://cdn.example.test/episode.mp4" "$aw_title" "frieren" "2"
 
 # Invalid player configuration must fail before a history record is written.
 rm -f "$ANIWATCH_HISTORY"
-if ( ANIWATCH_PLAYER=invalid aw_play_url "https://cdn.example.test/no.mp4" ); then
+if ( export ANIWATCH_PLAYER=invalid; aw_play_url "https://cdn.example.test/no.mp4" ) >/dev/null 2>&1; then
     echo "Expected invalid player configuration to fail" >&2
     exit 1
 fi
