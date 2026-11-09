@@ -37,11 +37,15 @@ aw_audio_language() {
 aw_history_add() {
     aw_url=$1
     aw_title=$2
+    aw_anime_id=${3:-}
+    aw_episode=${4:-}
     mkdir -p "$ANIWATCH_STATE_DIR" || aw_die "cannot create state directory"
     aw_now=$(date '+%Y-%m-%dT%H:%M:%S%z')
     aw_safe_title=$(printf '%s' "$aw_title" | tr '\t\r\n' '   ')
     aw_safe_url=$(printf '%s' "$aw_url" | tr '\t\r\n' '   ')
-    printf '%s\t%s\t%s\n' "$aw_now" "$aw_safe_title" "$aw_safe_url" >> "$ANIWATCH_HISTORY"
+    aw_safe_anime=$(printf '%s' "$aw_anime_id" | tr '\t\r\n' '   ')
+    aw_safe_episode=$(printf '%s' "$aw_episode" | tr '\t\r\n' '   ')
+    printf '%s\t%s\t%s\t%s\t%s\n' "$aw_now" "$aw_safe_anime" "$aw_safe_episode" "$aw_safe_title" "$aw_safe_url" >> "$ANIWATCH_HISTORY"
 }
 
 aw_play_url() {
@@ -75,13 +79,14 @@ aw_history_list() {
         printf '%s\n' "No watch history yet."
         return 0
     }
-    awk -F '\t' 'BEGIN { printf "%-24s %-48s %s\n", "WATCHED AT", "TITLE", "URL" } { printf "%-24s %-48.48s %s\n", $1, $2, $3 }' "$ANIWATCH_HISTORY"
+    awk -F '\t' 'BEGIN { printf "%-24s %-10s %-8s %-38s %s\n", "WATCHED AT", "ANIME ID", "EPISODE", "TITLE", "URL" } NF >= 5 { printf "%-24s %-10s %-8s %-38.38s %s\n", $1, $2, $3, $4, $5; next } { printf "%-24s %-10s %-8s %-38.38s %s\n", $1, "-", "-", $2, $3 }' "$ANIWATCH_HISTORY"
 }
 
 aw_history_continue() {
     [ -s "$ANIWATCH_HISTORY" ] || aw_die "watch history is empty"
     aw_last=$(tail -n 1 "$ANIWATCH_HISTORY")
-    aw_url=$(printf '%s\n' "$aw_last" | cut -f 3-)
+    aw_fields=$(printf '%s\n' "$aw_last" | awk -F '\t' '{print NF}')
+    if [ "$aw_fields" -ge 5 ]; then aw_url=$(printf '%s\n' "$aw_last" | cut -f 5-); else aw_url=$(printf '%s\n' "$aw_last" | cut -f 3-); fi
     [ -n "$aw_url" ] || aw_die "last history entry has no URL"
     aw_play_url "$aw_url"
 }
