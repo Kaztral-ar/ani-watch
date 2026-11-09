@@ -1,35 +1,77 @@
-# AniWatch
+<!-- AniWatch README -->
 
-<p align="center">
-  <img src="https://img.shields.io/badge/AniWatch-Anime%20in%20your%20terminal-7c3aed?style=for-the-badge" alt="AniWatch" />
-</p>
+<div align="center">
 
-<p align="center">
-  <strong>Discover anime. Browse episodes. Watch from your terminal.</strong>
-  <br />
-  A lightweight anime discovery and playback CLI built with POSIX shell.
-</p>
+  <img src="https://img.shields.io/badge/✦-ANIWATCH-8b5cf6?style=for-the-badge&labelColor=111827" alt="AniWatch" />
 
-<p align="center">
-  <a href="https://github.com/Kaztral-ar/ani-watch/actions/workflows/ci.yml"><img src="https://github.com/Kaztral-ar/ani-watch/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI" /></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-22c55e.svg" alt="MIT License" /></a>
-  <img src="https://img.shields.io/badge/shell-POSIX-2563eb.svg" alt="POSIX shell" />
-  <img src="https://img.shields.io/badge/platform-Linux%20%7C%20macOS%20%7C%20Termux-64748b.svg" alt="Linux, macOS and Termux" />
-</p>
+  <h1>AniWatch</h1>
+
+  <p><strong>Your anime corner, right in the terminal.</strong></p>
+  <p>Discover series · Explore episodes · Watch · Download</p>
+
+  <p>
+    <a href="https://github.com/Kaztral-ar/ani-watch/actions/workflows/ci.yml">
+      <img src="https://github.com/Kaztral-ar/ani-watch/actions/workflows/ci.yml/badge.svg?branch=main" alt="Build status" />
+    </a>
+    <a href="LICENSE">
+      <img src="https://img.shields.io/badge/license-MIT-8b5cf6.svg" alt="MIT License" />
+    </a>
+    <img src="https://img.shields.io/badge/platform-Linux%20%7C%20macOS%20%7C%20Termux-64748b.svg" alt="Supported platforms" />
+  </p>
+
+  <p>
+    <a href="#-features">Features</a> ·
+    <a href="#-installation">Installation</a> ·
+    <a href="#-quick-start">Quick start</a> ·
+    <a href="#-commands">Commands</a> ·
+    <a href="#-configuration">Configuration</a>
+  </p>
+
+</div>
 
 ---
 
-## Install
+## ✦ Features
 
-### 1. Install dependencies
+| | Feature | What it does |
+|:--:|---|---|
+| 🔎 | **Anime discovery** | Search titles, explore top anime, seasonal picks and random recommendations |
+| 📺 | **Episode browsing** | Find episodes and inspect available server listings |
+| ▶️ | **Playback** | Open supported media streams with MPV or VLC |
+| ⬇️ | **Downloads** | Download supported media and episode ranges |
+| 🎞️ | **HLS support** | Select available stream quality and play or download accessible playlists |
+| 📚 | **Watch history** | Review your history and continue from a saved entry |
+| 🤝 | **Watch together** | Launch supported streams through Syncplay |
+| ✨ | **Optional extras** | MPV intro/outro skip integration through ani-skip |
+
+---
+
+## ⚡ Quick start
+
+Clone the project and launch AniWatch:
+
+```sh
+git clone https://github.com/Kaztral-ar/ani-watch.git
+cd ani-watch
+./bin/aniwatch
+```
+
+That's it — open the interactive interface and start exploring.
+
+---
+
+## 📦 Installation
+
+Install the required tools for your platform, then clone the repository using the quick-start steps above.
 
 <details>
-<summary><strong>Termux · Android</strong></summary>
+<summary><strong>Android · Termux</strong></summary>
 
 ```sh
 pkg update
 pkg install git curl jq fzf yt-dlp mpv
 ```
+
 </details>
 
 <details>
@@ -39,6 +81,7 @@ pkg install git curl jq fzf yt-dlp mpv
 sudo apt update
 sudo apt install git curl jq fzf yt-dlp mpv
 ```
+
 </details>
 
 <details>
@@ -47,124 +90,141 @@ sudo apt install git curl jq fzf yt-dlp mpv
 ```sh
 brew install git curl jq fzf yt-dlp mpv
 ```
+
 </details>
 
-MPV is the default player. VLC can be used as an alternative. `ffmpeg`, `syncplay`, and `ani-skip` are optional.
+**Player:** MPV is used by default. VLC is supported as an alternative.
 
-### 2. Clone the repository
+**Optional tools:** `ffmpeg`, `syncplay`, and `ani-skip` are only needed for their respective optional features.
+
+---
+
+## 🎬 Quick start
+
+### Search and browse
 
 ```sh
-git clone https://github.com/Kaztral-ar/ani-watch.git
-cd ani-watch
+# Search for an anime
+./bin/aniwatch search "Frieren"
+
+# Browse episodes for a result
+./bin/aniwatch episodes <anime-slug>
+
+# Inspect available servers for an episode
+./bin/aniwatch servers <episode-id>
 ```
 
-### 3. Launch AniWatch
+### Discover something to watch
 
 ```sh
-./bin/aniwatch
+# Search anime metadata
+./bin/aniwatch metadata-search "Naruto"
+
+# Explore recommendations
+./bin/aniwatch top
+./bin/aniwatch random
+./bin/aniwatch season
+
+# View anime details
+./bin/aniwatch info <mal-id>
 ```
 
 ---
 
-## Usage
+## ⌨️ Commands
 
-### Interactive mode
-
-Launch the interactive terminal interface:
-
-```sh
-./bin/aniwatch
-```
-
-### Find anime and episodes
+<details open>
+<summary><strong>Playback and downloads</strong></summary>
 
 ```sh
-# Search anime
-./bin/aniwatch search "Frieren"
-
-# Browse episodes and available servers
-./bin/aniwatch episodes <anime-slug>
-./bin/aniwatch servers <episode-id>
-```
-
-### Discover anime
-
-```sh
-./bin/aniwatch metadata-search "Naruto"
-./bin/aniwatch top
-./bin/aniwatch random
-./bin/aniwatch season
-./bin/aniwatch info <mal-id>
-```
-
-### Watch and download
-
-Use a direct media URL or an accessible stream URL:
-
-```sh
-# Play
+# Play a supported media URL
 ./bin/aniwatch watch "<media-url>" 1080p sub
 
-# Download
+# Download a supported media URL
 ./bin/aniwatch download "<media-url>" 720p dub
 
-# Play an HLS playlist
+# Play an accessible HLS playlist
 ./bin/aniwatch hls "<playlist.m3u8>" 720p
 
-# Download an HLS playlist
+# Download an accessible HLS playlist
 ./bin/aniwatch hls-download "<playlist.m3u8>" best
-```
 
-### Bulk download
-
-Download an episode range when direct stream URLs are available:
-
-```sh
+# Download an episode range when direct stream URLs are available
 ./bin/aniwatch bulk-download <anime-slug> 1-12 sub 720p
 ```
 
-### History and watch together
+</details>
+
+<details>
+<summary><strong>History and Syncplay</strong></summary>
 
 ```sh
+# View watch history
 ./bin/aniwatch history
+
+# Continue from saved history
 ./bin/aniwatch continue
+
+# Clear watch history
 ./bin/aniwatch history-clear
+
+# Start a synchronized session
 ./bin/aniwatch syncplay "<media-url>"
 ```
 
-### Player and optional features
+</details>
 
-Use VLC instead of MPV:
-
-```sh
-ANIWATCH_PLAYER=vlc ./bin/aniwatch
-```
-
-Enable optional intro/outro skip data with the separately installed `ani-skip` tool (MPV only):
-
-```sh
-ANIWATCH_SKIP_INTRO=1 ./bin/aniwatch
-```
-
-See the complete command list:
+<details>
+<summary><strong>Help</strong></summary>
 
 ```sh
 ./bin/aniwatch help
 ```
 
+</details>
+
 ---
 
-## Notes
+## ⚙️ Configuration
 
-- **Supported playback:** direct media URLs and accessible HLS playlists.
-- **Provider limitation:** a listed server is not always a playable stream. Opaque embed IDs that require protected or obfuscated resolution are not decoded.
-- **Availability:** provider endpoints and site structure can change over time.
-- **Playback:** DRM and access controls are not bypassed.
+### Use VLC
 
-<p align="center">
-  <sub>Made for anime fans who love the terminal.</sub>
-  <br />
-  <a href="https://github.com/Kaztral-ar/ani-watch">Star the project on GitHub</a>
+Switch from the default MPV player:
+
+```sh
+ANIWATCH_PLAYER=vlc ./bin/aniwatch
+```
+
+### Enable intro/outro skip
+
+If `ani-skip` is installed, enable its integration for MPV:
+
+```sh
+ANIWATCH_SKIP_INTRO=1 ./bin/aniwatch
+```
+
+---
+
+## ℹ️ Important notes
+
+- AniWatch supports **direct media URLs** and **accessible HLS playlists**.
+- A server shown in a listing is not guaranteed to provide a directly playable stream.
+- Opaque embed identifiers that require protected or obfuscated resolution are not decoded.
+- Provider endpoints and website structures can change, which may temporarily affect discovery or server listings.
+- AniWatch does not bypass DRM or other access controls.
+
+---
+
+<div align="center">
+
+  **Enjoy your next episode. 🍿**
+
+  If AniWatch is useful, consider giving the project a ⭐
+
+  <a href="https://github.com/Kaztral-ar/ani-watch">GitHub Repository</a>
   ·
-  <a href="https://github.com/Kaztral-ar/ani-watch/issues">Report an issue</a>
-</p>
+  <a href="https://github.com/Kaztral-ar/ani-watch/issues">Report a bug</a>
+  ·
+  <a href="LICENSE">MIT License</a>
+
+</div>
