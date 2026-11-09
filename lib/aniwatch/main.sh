@@ -53,13 +53,12 @@ aw_interactive() {
 }
 
 aw_media_command() {
-    [ "$#" -ge 1 ] || aw_die "$1 requires a URL"
+    [ "$#" -ge 1 ] || aw_die "watch requires a URL"
     aw_url=$1
     shift
     aw_quality=${1:-$ANIWATCH_QUALITY}
     aw_mode=${2:-$ANIWATCH_MODE}
-    case "$aw_quality" in best|worst|360p|480p|720p|1080p) ;; *) aw_die "invalid quality: $aw_quality" ;; esac
-    case "$aw_mode" in sub|dub) ;; *) aw_die "mode must be sub or dub" ;; esac
+    aw_quality_format "$aw_quality" "$aw_mode" >/dev/null
     aw_play_url "$aw_url" "$aw_quality" "$aw_mode"
 }
 
@@ -67,7 +66,10 @@ aw_download_command() {
     [ "$#" -ge 1 ] || aw_die "download requires a URL"
     aw_url=$1
     shift
-    aw_download_url "$aw_url" "${1:-$ANIWATCH_QUALITY}" "${2:-$ANIWATCH_MODE}"
+    aw_quality=${1:-$ANIWATCH_QUALITY}
+    aw_mode=${2:-$ANIWATCH_MODE}
+    aw_quality_format "$aw_quality" "$aw_mode" >/dev/null
+    aw_download_url "$aw_url" "$aw_quality" "$aw_mode"
 }
 
 aniwatch_main() {
@@ -84,7 +86,7 @@ aniwatch_main() {
         history-clear) shift; [ "$#" -eq 0 ] || aw_die "history-clear takes no arguments"; aw_history_clear ;;
         syncplay) shift; [ "$#" -eq 1 ] || aw_die "syncplay requires one URL"; aw_syncplay_url "$1" ;;
         help|-h|--help) aw_usage ;;
-        version|-V|--version) printf '%s\n' "AniWatch 1.2.0" ;;
+        version|-V|--version) printf '%s\n' "AniWatch 1.2.1" ;;
         '') aw_interactive ;;
         *) aw_usage >&2; aw_die "unknown command: $1" ;;
     esac
