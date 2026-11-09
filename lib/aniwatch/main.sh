@@ -52,6 +52,24 @@ aw_interactive() {
     aw_pick_search_result "$aw_data"
 }
 
+aw_media_command() {
+    [ "$#" -ge 1 ] || aw_die "$1 requires a URL"
+    aw_url=$1
+    shift
+    aw_quality=${1:-$ANIWATCH_QUALITY}
+    aw_mode=${2:-$ANIWATCH_MODE}
+    case "$aw_quality" in best|worst|360p|480p|720p|1080p) ;; *) aw_die "invalid quality: $aw_quality" ;; esac
+    case "$aw_mode" in sub|dub) ;; *) aw_die "mode must be sub or dub" ;; esac
+    aw_play_url "$aw_url" "$aw_quality" "$aw_mode"
+}
+
+aw_download_command() {
+    [ "$#" -ge 1 ] || aw_die "download requires a URL"
+    aw_url=$1
+    shift
+    aw_download_url "$aw_url" "${1:-$ANIWATCH_QUALITY}" "${2:-$ANIWATCH_MODE}"
+}
+
 aniwatch_main() {
     case "${1:-}" in
         search) shift; aw_search_command "$@" ;;
@@ -59,9 +77,14 @@ aniwatch_main() {
         random) shift; aw_random_command ;;
         season) shift; aw_season_command "$@" ;;
         info) shift; aw_info_command "$@" ;;
-        play) shift; [ "$#" -eq 1 ] || aw_die "play requires one URL"; aw_play_url "$1" ;;
+        watch|play) shift; aw_media_command "$@" ;;
+        download) shift; aw_download_command "$@" ;;
+        history) shift; [ "$#" -eq 0 ] || aw_die "history takes no arguments"; aw_history_list ;;
+        continue) shift; [ "$#" -eq 0 ] || aw_die "continue takes no arguments"; aw_history_continue ;;
+        history-clear) shift; [ "$#" -eq 0 ] || aw_die "history-clear takes no arguments"; aw_history_clear ;;
+        syncplay) shift; [ "$#" -eq 1 ] || aw_die "syncplay requires one URL"; aw_syncplay_url "$1" ;;
         help|-h|--help) aw_usage ;;
-        version|-V|--version) printf '%s\n' "AniWatch 1.1.0" ;;
+        version|-V|--version) printf '%s\n' "AniWatch 1.2.0" ;;
         '') aw_interactive ;;
         *) aw_usage >&2; aw_die "unknown command: $1" ;;
     esac
