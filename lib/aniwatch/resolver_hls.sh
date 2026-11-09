@@ -87,14 +87,15 @@ aw_play_hls() {
     aw_hls_play_mal_id=${5:-}
     aw_hls_play_episode=${6:-}
     aw_hls_play_aniskip_id=${7:-}
+    aw_hls_play_mode=${8:-$ANIWATCH_MODE}
     aw_validate_url "$aw_hls_play_manifest"
     case "$aw_hls_play_quality" in best|worst|360p|480p|720p|1080p) ;; *) aw_die "invalid HLS quality: $aw_hls_play_quality" ;; esac
     case "$ANIWATCH_PLAYER" in
         mpv)
             aw_require mpv
             aw_require yt-dlp
-            aw_hls_play_format=$(aw_quality_format "$aw_hls_play_quality" "$ANIWATCH_MODE")
-            aw_hls_play_audio=$(aw_audio_language "$ANIWATCH_MODE")
+            aw_hls_play_format=$(aw_quality_format "$aw_hls_play_quality" "$aw_hls_play_mode")
+            aw_hls_play_audio=$(aw_audio_language "$aw_hls_play_mode")
             aw_hls_play_skip=$(aw_aniskip_flags "$aw_hls_play_aniskip_id" "$aw_hls_play_episode" || :)
             if [ -n "$aw_hls_play_skip" ]; then
                 case $- in *f*) aw_hls_play_noglob=1 ;; *) aw_hls_play_noglob=0; set -f ;; esac
