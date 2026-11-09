@@ -15,6 +15,7 @@ aw_top_command() {
 
 aw_info_command() {
     [ "$#" -eq 1 ] || aw_die "info requires one numeric anime ID"
+    case "$1" in ''|*[!0-9]*|0) aw_die "anime ID must be a positive integer" ;; esac
     aw_check_deps
     aw_data=$(aw_info_by_id "$1") || aw_die "could not retrieve anime details"
     aw_print_info <<EOF
