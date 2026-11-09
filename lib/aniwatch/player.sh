@@ -40,6 +40,7 @@ aw_history_add() {
     aw_h_anime_id=${3:-}
     aw_h_episode=${4:-}
     aw_h_referer=${5:-}
+    aw_h_mode=${6:-}
     umask 077
     mkdir -p "$ANIWATCH_STATE_DIR" || aw_die "cannot create state directory"
     aw_h_now=$(date '+%Y-%m-%dT%H:%M:%S%z')
@@ -48,7 +49,8 @@ aw_history_add() {
     aw_h_safe_anime=$(printf '%s' "$aw_h_anime_id" | tr '\t\r\n' '   ')
     aw_h_safe_episode=$(printf '%s' "$aw_h_episode" | tr '\t\r\n' '   ')
     aw_h_safe_referer=$(printf '%s' "$aw_h_referer" | tr '\t\r\n' '   ')
-    printf '%s\t%s\t%s\t%s\t%s\t%s\n' "$aw_h_now" "$aw_h_safe_anime" "$aw_h_safe_episode" "$aw_h_safe_title" "$aw_h_safe_url" "$aw_h_safe_referer" >> "$ANIWATCH_HISTORY"
+    aw_h_safe_mode=$(printf '%s' "$aw_h_mode" | tr '\t\r\n' '   ')
+    printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\n' "$aw_h_now" "$aw_h_safe_anime" "$aw_h_safe_episode" "$aw_h_safe_title" "$aw_h_safe_url" "$aw_h_safe_referer" "$aw_h_safe_mode" >> "$ANIWATCH_HISTORY"
     chmod 600 "$ANIWATCH_HISTORY" 2>/dev/null || :
     aw_h_tmp="$ANIWATCH_HISTORY.tmp"
     if [ "$(wc -l < "$ANIWATCH_HISTORY" | tr -d ' ')" -gt 500 ]; then
@@ -121,7 +123,7 @@ aw_play_url() {
         *) aw_die "ANIWATCH_PLAYER must be mpv or vlc" ;;
     esac
     if [ "$aw_play_status" -eq 0 ]; then
-        aw_history_add "$aw_play_url_value" "$aw_play_title" "$aw_play_mal_id" "$aw_play_episode_no" "$aw_play_referer"
+        aw_history_add "$aw_play_url_value" "$aw_play_title" "$aw_play_mal_id" "$aw_play_episode_no" "$aw_play_referer" "$aw_play_mode"
     fi
     return "$aw_play_status"
 }
@@ -162,15 +164,18 @@ aw_history_continue() {
         aw_continue_url=$(printf '%s\n' "$aw_continue_last" | cut -f 5)
         aw_continue_referer=$(printf '%s\n' "$aw_continue_last" | cut -f 6)
         aw_continue_title=$(printf '%s\n' "$aw_continue_last" | cut -f 4)
+        aw_continue_mode=$(printf '%s\n' "$aw_continue_last" | cut -f 7)
+        case "$aw_continue_mode" in sub|dub) ;; *) aw_continue_mode=$ANIWATCH_MODE ;; esac
     else
         aw_continue_url=$(printf '%s\n' "$aw_continue_last" | cut -f 3-)
         aw_continue_referer=
         aw_continue_title="Continue watching"
+        aw_continue_mode=$ANIWATCH_MODE
     fi
     [ -n "$aw_continue_url" ] || aw_die "last history entry has no URL"
     case "$aw_continue_url" in
-        *.m3u8*|*.m3u*) aw_play_hls "$aw_continue_url" "$ANIWATCH_QUALITY" "$aw_continue_referer" "$aw_continue_title" ;;
-        *) aw_play_url "$aw_continue_url" "$ANIWATCH_QUALITY" "$ANIWATCH_MODE" "$aw_continue_title" "" "" "$aw_continue_referer" ;;
+        *.m3u8*|*.m3u*) aw_play_hls "$aw_continue_url" "$ANIWATCH_QUALITY" "$aw_continue_referer" "$aw_continue_title" "" "" "" "$aw_continue_mode" ;;
+        *) aw_play_url "$aw_continue_url" "$ANIWATCH_QUALITY" "$aw_continue_mode" "$aw_continue_title" "" "" "$aw_continue_referer" ;;
     esac
 }
 
