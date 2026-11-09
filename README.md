@@ -46,7 +46,7 @@ sh bin/aniwatch help
 ```sh
 # HiAnime catalog
 aniwatch hianime-search "Frieren"
-aniwatch episodes frieren-beyond-journeys-end-..." # use the anime ID/slug from search
+aniwatch episodes "slug-from-search-results" # use the exact slug printed by search
 aniwatch servers 123456                 # use an episode ID from episodes
 
 # Jikan metadata
