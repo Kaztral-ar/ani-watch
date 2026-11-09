@@ -17,6 +17,8 @@ Playback (URL must be supported by yt-dlp):
   aniwatch watch <url> [quality] [sub|dub]
   aniwatch play <url> [quality] [sub|dub]
   aniwatch download <url> [quality] [sub|dub]
+  aniwatch hls <manifest.m3u8> [quality] [referer] [title]
+  aniwatch hls-download <manifest.m3u8> [quality] [referer]
   aniwatch syncplay <url>
   aniwatch history                  Show watch history
   aniwatch continue                 Resume last history URL
@@ -29,6 +31,7 @@ Dependencies:
   curl, jq        Metadata and provider requests
   fzf             Interactive selection
   yt-dlp          Stream extraction and downloads
+  ffmpeg          Optional HLS download/remux fallback
   mpv             Playback and Syncplay player
   syncplay        Synchronized viewing (optional)
 
@@ -40,6 +43,9 @@ Configuration:
   ANIWATCH_DOWNLOAD_DIR=.
   ANIWATCH_STATE_DIR=$HOME/.local/state/aniwatch
   ANIWATCH_SYNCPLAY_SERVER=syncplay.pl:8995
+
+HLS commands inspect accessible master playlists and select a quality variant.
+Pass the provider-required Referer when a legitimate stream requires one.
 
 HiAnime search uses the site's HTML search page. Episode and server
 commands use its page endpoints. These unofficial endpoints may change
