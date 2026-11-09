@@ -111,7 +111,8 @@ PATH="$tmpdir/bin:$PATH"
 export PATH
 MOCK_MPV_ARGS="$tmpdir/mpv.args"
 MOCK_FFMPEG_ARGS="$tmpdir/ffmpeg.args"
-export MOCK_MPV_ARGS MOCK_FFMPEG_ARGS
+MOCK_FFMPEG_HEADER_HEX="$tmpdir/ffmpeg-header.hex"
+export MOCK_MPV_ARGS MOCK_FFMPEG_ARGS MOCK_FFMPEG_HEADER_HEX
 ANIWATCH_STATE_DIR="$tmpdir/state"
 ANIWATCH_HISTORY="$ANIWATCH_STATE_DIR/history.tsv"
 ANIWATCH_DOWNLOAD_DIR="$tmpdir/downloads"
