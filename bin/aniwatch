@@ -7,6 +7,7 @@ ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 . "$ROOT/lib/aniwatch/provider_jikan.sh"
 . "$ROOT/lib/aniwatch/provider_hianime.sh"
 . "$ROOT/lib/aniwatch/ui.sh"
+. "$ROOT/lib/aniwatch/resolver_hls.sh"
 . "$ROOT/lib/aniwatch/player.sh"
 . "$ROOT/lib/aniwatch/cli.sh"
 . "$ROOT/lib/aniwatch/main.sh"
