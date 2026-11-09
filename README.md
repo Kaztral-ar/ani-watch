@@ -1,13 +1,14 @@
 # AniWatch
 
-AniWatch is a modular POSIX-shell anime discovery and playback CLI. It combines Jikan/MyAnimeList metadata with **yt-dlp-compatible URL extraction**, MPV playback, local watch history, downloads and optional Syncplay sessions.
+AniWatch is a modular POSIX-shell anime discovery and playback CLI. It combines Jikan/MyAnimeList metadata, a HiAnime catalog adapter for title/episode/server listings, yt-dlp-compatible URL playback, MPV, local watch history and optional Syncplay.
 
-> **Provider boundary:** Jikan is metadata-only. To watch or download, provide a media page URL supported by your installed yt-dlp version and accessible to your account. AniWatch does not scrape around authentication, bypass DRM, or host content.
+> **Provider boundary:** Jikan supplies anime metadata. The HiAnime adapter queries the site's search page and episode/server endpoints. These are unofficial website endpoints and may change or reject automated requests. Server listings are not direct video URLs. Playback still requires a media URL supported by yt-dlp and accessible to your account. AniWatch does not bypass DRM or access controls.
 
 ## Features
 
-- Search, popular, random and seasonal anime discovery through Jikan.
-- Interactive title selection with fzf.
+- Search anime metadata through Jikan.
+- Search HiAnime titles and list episodes and server labels.
+- Browse popular, random and seasonal anime through Jikan.
 - Play supported media URLs using MPV and yt-dlp.
 - Prefer Japanese audio (`sub`) or English audio (`dub`) when the source exposes language metadata.
 - Select best, worst, 360p, 480p, 720p or 1080p formats when available.
@@ -19,8 +20,8 @@ AniWatch is a modular POSIX-shell anime discovery and playback CLI. It combines 
 ## Requirements
 
 - POSIX-compatible shell
-- `curl` and `jq` for metadata
-- `fzf` for interactive search
+- `curl` and `jq`
+- `fzf` for interactive Jikan search
 - `yt-dlp` and `mpv` for playback and downloads
 - `syncplay` for synchronized sessions
 
@@ -43,7 +44,12 @@ sh bin/aniwatch help
 ## Usage
 
 ```sh
-# Metadata discovery
+# HiAnime catalog
+aniwatch hianime-search "Frieren"
+aniwatch episodes frieren-beyond-journeys-end-..." # use the anime ID/slug from search
+aniwatch servers 123456                 # use an episode ID from episodes
+
+# Jikan metadata
 aniwatch search "Frieren"
 aniwatch top
 aniwatch random
@@ -51,14 +57,12 @@ aniwatch season
 aniwatch season 2025 autumn
 aniwatch info 52991
 
-# Play a supported episode/page URL
+# Play a supported media/page URL
 aniwatch watch "https://example.com/watch/episode" 1080p sub
 aniwatch watch "https://example.com/watch/episode" 720p dub
-
-# Download with chosen quality and audio preference
 aniwatch download "https://example.com/watch/episode" 1080p sub
 
-# Watch together (all participants need access to the same stream)
+# Watch together
 aniwatch syncplay "https://example.com/video.mp4"
 
 # History
@@ -67,34 +71,26 @@ aniwatch continue
 aniwatch history-clear
 ```
 
+The HiAnime search command prints a slug and title. Pass that slug to `episodes`; pass an episode ID from that output to `servers`. The server command displays the available server labels and type only. It does not resolve embedded players into direct stream URLs.
+
 ### Audio and quality behavior
 
 - `sub` prefers Japanese audio; `dub` prefers English audio.
 - The source must expose audio-language metadata for yt-dlp to select the intended track reliably.
 - Subtitle tracks are selected in MPV using English as the default preference. Downloads embed English subtitles when the source provides them.
 - Quality is a maximum-height preference; if the requested resolution is unavailable, yt-dlp may choose a lower available format.
-- MPV is used because it can hand supported sites to yt-dlp and consume the selected format. VLC is not currently the integrated yt-dlp playback backend.
 
 ### Watch history
 
-History is stored locally at:
-
-```text
-$XDG_STATE_HOME/aniwatch/history.tsv
-```
-
-If `XDG_STATE_HOME` is unset, AniWatch uses `~/.local/state/aniwatch/`. Override the location with `ANIWATCH_STATE_DIR`. History contains timestamps, titles/URLs and media URLs; it is not uploaded.
-
-### Syncplay
-
-Syncplay synchronizes player state, not video files or provider access. Every participant must have access to a compatible stream and use a compatible player. Set a private or public server with `ANIWATCH_SYNCPLAY_SERVER`; the default is `syncplay.pl:8995`.
+History is stored locally at `$XDG_STATE_HOME/aniwatch/history.tsv`. If `XDG_STATE_HOME` is unset, AniWatch uses `~/.local/state/aniwatch/`. Override the location with `ANIWATCH_STATE_DIR`. History is not uploaded.
 
 ## Configuration
 
 | Variable | Default | Purpose |
 |---|---|---|
-| `ANIWATCH_API_URL` | `https://api.jikan.moe/v4` | Metadata API |
-| `ANIWATCH_LIMIT` | `10` | Search/season result count |
+| `ANIWATCH_API_URL` | `https://api.jikan.moe/v4` | Jikan metadata API |
+| `ANIWATCH_HIANIME_BASE` | `https://hianime.at` | HiAnime site base |
+| `ANIWATCH_LIMIT` | `10` | Jikan result count |
 | `ANIWATCH_QUALITY` | `best` | Default playback/download quality |
 | `ANIWATCH_MODE` | `sub` | Default audio preference |
 | `ANIWATCH_DOWNLOAD_DIR` | `.` | Download destination |
@@ -109,22 +105,23 @@ make build
 sh dist/aniwatch help
 ```
 
-Source modules live in `lib/aniwatch/`; the standalone build is generated at `dist/aniwatch`.
+Source modules live in `lib/aniwatch/`; the standalone build is generated by `scripts/build.sh`.
 
 ## Comparison with upstream ani-cli
 
-AniWatch is a separate implementation inspired by the terminal workflow of [pystardust/ani-cli](https://github.com/pystardust/ani-cli). It does not copy upstream source code.
+AniWatch is an independent implementation inspired by the terminal workflow of [pystardust/ani-cli](https://github.com/pystardust/ani-cli). It does not copy upstream source code.
 
 | Capability | upstream ani-cli | AniWatch |
 |---|---|---|
-| Anime search and selection | Provider scraping + fzf/rofi/dmenu | Jikan + fzf |
-| Episode streaming | Provider-specific resolver | yt-dlp-supported URLs |
-| Sub/dub | Provider-specific | Audio-language preference when exposed |
-| Quality selection | Yes | yt-dlp format selection |
-| Downloads | Yes | yt-dlp |
-| Watch history | Yes | Local URL history + continue |
+| Anime search | HiAnime HTML search | HiAnime HTML search + Jikan |
+| Episode list | HiAnime episode endpoint | HiAnime episode endpoint |
+| Server list | HiAnime server endpoint + provider resolver | HiAnime server labels only |
+| Direct stream resolution | Provider-specific embed resolver | Not implemented |
+| Sub/dub | Provider server selection | Audio-language preference for supplied URLs |
+| Quality | Provider/HLS selection | yt-dlp format selection |
+| Downloads | Yes | yt-dlp for supported URLs |
+| Watch history | Episode-aware | Local URL history |
 | Syncplay | Yes | Syncplay client integration |
-| Intro skip / release countdown | Yes | Not implemented |
 
 ## License
 
