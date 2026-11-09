@@ -97,7 +97,12 @@ exit "${MOCK_MPV_EXIT:-0}"
 MOCK
 cat > "$tmpdir/bin/ffmpeg" <<'MOCK'
 #!/bin/sh
-printf '%s\\n' "$@" > "$MOCK_FFMPEG_ARGS"
+for arg do
+    case "$arg" in
+        Referer:*) printf '%s' "$arg" | od -An -tx1 > "$MOCK_FFMPEG_HEADER_HEX" ;;
+    esac
+done
+printf '%s\n' "$@" > "$MOCK_FFMPEG_ARGS"
 exit 0
 MOCK
 cat > "$tmpdir/bin/yt-dlp" <<'MOCK'
@@ -162,7 +167,7 @@ grep -q -- '--ytdl-format=' "$MOCK_MPV_ARGS"
 if MOCK_YTDLP_EXIT=1 aw_download_hls "https://cdn.example.test/fallback.m3u8" 720p "https://hianime.at" "Fallback"; then
     :
 fi
-grep -F "Referer: https://hianime.at" "$MOCK_FFMPEG_ARGS" >/dev/null
+grep -q "0d 0a" "$MOCK_FFMPEG_HEADER_HEX"
 grep -F "$(printf '\\r')" "$MOCK_FFMPEG_ARGS" >/dev/null
 
 # The master URL's separate audio rendition remains in the source manifest.
