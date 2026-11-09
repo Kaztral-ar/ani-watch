@@ -34,9 +34,18 @@ aw_hianime_episodes() {
     aw_json=$(aw_get "${ANIWATCH_HIANIME_BASE}/api/theme/episode/list/$1") || return 1
     aw_html=$(printf '%s' "$aw_json" | aw_hianime_response_html)
     [ -n "$aw_html" ] || return 1
-    printf '%s' "$aw_html" |
-        sed 's|ep-item|\nep-item|g' |
-        sed -nE 's|.*data-number="([^"]*)".*data-id="([0-9]+)".*|\2\t\1|p'
+    aw_hianime_parse_episodes "$aw_html"
+}
+
+aw_hianime_parse_episodes() {
+    printf '%s' "$1" | sed 's|ep-item|\nep-item|g' |
+    while IFS= read -r aw_item; do
+        aw_number=$(printf '%s' "$aw_item" | sed -nE 's|.*data-number="([^"]*)".*|\1|p')
+        aw_id=$(printf '%s' "$aw_item" | sed -nE 's|.*data-id="([0-9]+)".*|\1|p')
+        if [ -n "$aw_number" ] && [ -n "$aw_id" ]; then
+            printf '%s\t%s\n' "$aw_id" "$aw_number"
+        fi
+    done
 }
 
 aw_hianime_servers() {
@@ -44,10 +53,20 @@ aw_hianime_servers() {
     aw_json=$(aw_get "${ANIWATCH_HIANIME_BASE}/api/theme/episode/servers?episodeId=$1") || return 1
     aw_html=$(printf '%s' "$aw_json" | aw_hianime_response_html)
     [ -n "$aw_html" ] || return 1
-    printf '%s' "$aw_html" |
-        sed 's|server-item|\nserver-item|g' |
-        sed -nE 's|.*data-type="([^"]*)".*data-server-name="([^"]*)".*data-id="([^"]*)".*|\1\t\2\t\3|p' |
-        sed -e "s|&#039;|'|g" -e 's|&amp;|\&|g'
+    aw_hianime_parse_servers "$aw_html"
+}
+
+aw_hianime_parse_servers() {
+    printf '%s' "$1" | sed 's|server-item|\nserver-item|g' |
+    while IFS= read -r aw_item; do
+        aw_type=$(printf '%s' "$aw_item" | sed -nE 's|.*data-type="([^"]*)".*|\1|p')
+        aw_name=$(printf '%s' "$aw_item" | sed -nE 's|.*data-server-name="([^"]*)".*|\1|p')
+        aw_id=$(printf '%s' "$aw_item" | sed -nE 's|.*data-id="([^"]*)".*|\1|p')
+        if [ -n "$aw_type" ] && [ -n "$aw_name" ]; then
+            aw_name=$(printf '%s' "$aw_name" | sed -e "s|&#039;|'|g" -e 's|&amp;|\&|g')
+            printf '%s\t%s\t%s\n' "$aw_type" "$aw_name" "$aw_id"
+        fi
+    done
 }
 
 aw_hianime_print_search() {
