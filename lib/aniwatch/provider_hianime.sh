@@ -19,7 +19,7 @@ aw_hianime_search() {
     [ -n "$1" ] || aw_die "search query cannot be empty"
     aw_hq=$(aw_encode "$1")
     aw_page=$(aw_get_html "${ANIWATCH_HIANIME_BASE}/search?keyword=${aw_hq}") || return 1
-    printf '%s' "$aw_page" |
+    printf '%s' "$aw_page" | tr '\n' ' ' |
         sed 's|<div class="film-detail">|\n<div class="film-detail">|g' |
         sed -nE 's|.*<a href="[^"]*/([^"/?]+)"[^>]*title="([^"]*)".*|\1\t\2|p' |
         sed -e "s|&#039;|'|g" -e 's|&quot;|"|g' -e 's|&amp;|\&|g'
