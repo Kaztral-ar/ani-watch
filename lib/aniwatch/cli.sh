@@ -18,11 +18,16 @@ Playback (URL must be supported by yt-dlp):
   aniwatch watch <url> [quality] [sub|dub]
   aniwatch play <url> [quality] [sub|dub]
   aniwatch download <url> [quality] [sub|dub]
+  aniwatch bulk-download <anime_slug> <start-end> [sub|dub] [quality]
   aniwatch hls <manifest.m3u8> [quality] [referer] [title]
   aniwatch hls-download <manifest.m3u8> [quality] [referer]
   aniwatch syncplay <url>
   aniwatch history                  Show watch history
   aniwatch continue                 Resume last history URL
+
+Playback options:
+  ANIWATCH_PLAYER=mpv|vlc           Select the media player (default: mpv)
+  ANIWATCH_SKIP_INTRO=1             Use installed ani-skip with MPV only
   aniwatch history-clear            Clear watch history
 
 Quality: best, worst, 360p, 480p, 720p, 1080p
@@ -33,7 +38,9 @@ Dependencies:
   fzf             Interactive selection
   yt-dlp          Stream extraction and downloads
   ffmpeg          Optional HLS download/remux fallback
-  mpv             Playback and Syncplay player
+  mpv             Playback, Ani-Skip and Syncplay player
+  vlc             Optional alternative playback player
+  ani-skip        Optional opening/ending skip integration (MPV only)
   syncplay        Synchronized viewing (optional)
 
 Configuration:
