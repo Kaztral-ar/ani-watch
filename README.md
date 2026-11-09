@@ -45,12 +45,12 @@ sh bin/aniwatch help
 
 ```sh
 # HiAnime catalog
-aniwatch hianime-search "Frieren"
+aniwatch search "Frieren"
 aniwatch episodes "slug-from-search-results" # use the exact slug printed by search
 aniwatch servers 123456                 # use an episode ID from episodes
 
 # Jikan metadata
-aniwatch search "Frieren"
+aniwatch metadata-search "Frieren"
 aniwatch top
 aniwatch random
 aniwatch season
