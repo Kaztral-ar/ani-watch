@@ -104,44 +104,66 @@ aw_interactive() {
 }
 aw_download_range_command() {
     [ "$#" -ge 2 ] || aw_die "bulk-download requires ANIME_SLUG and START-END"
-    aw_slug=$1
-    aw_range=$2
-    aw_mode=${3:-$ANIWATCH_MODE}
-    aw_quality=${4:-$ANIWATCH_QUALITY}
-    case "$aw_range" in
-        *-*) aw_start=${aw_range%-*}; aw_end=${aw_range#*-} ;;
-        *) aw_start=$aw_range; aw_end=$aw_range ;;
+    aw_bulk_slug=$1
+    aw_bulk_range=$2
+    aw_bulk_mode=${3:-$ANIWATCH_MODE}
+    aw_bulk_quality=${4:-$ANIWATCH_QUALITY}
+    case "$aw_bulk_range" in
+        *-*) aw_bulk_start=${aw_bulk_range%-*}; aw_bulk_end=${aw_bulk_range#*-} ;;
+        *) aw_bulk_start=$aw_bulk_range; aw_bulk_end=$aw_bulk_range ;;
     esac
-    case "$aw_start:$aw_end" in *[!0-9:]*|:*|*:) aw_die "episode range must be numeric, for example 1-12" ;; esac
-    [ "$aw_start" -gt 0 ] && [ "$aw_end" -ge "$aw_start" ] || aw_die "invalid episode range"
-    case "$aw_mode" in sub|dub) ;; *) aw_die "mode must be sub or dub" ;; esac
-    aw_quality_format "$aw_quality" "$aw_mode" >/dev/null
+    case "$aw_bulk_start:$aw_bulk_end" in *[!0-9:]*|:*|*:) aw_die "episode range must be numeric, for example 1-12" ;; esac
+    [ "$aw_bulk_start" -gt 0 ] && [ "$aw_bulk_end" -ge "$aw_bulk_start" ] || aw_die "invalid episode range"
+    case "$aw_bulk_mode" in sub|dub) ;; *) aw_die "mode must be sub or dub" ;; esac
+    aw_quality_format "$aw_bulk_quality" "$aw_bulk_mode" >/dev/null
     aw_check_deps
-    aw_episode_rows=$(aw_hianime_episodes "$aw_slug") || aw_die "could not retrieve episodes"
-    aw_selected=$(printf '%s\n' "$aw_episode_rows" | awk -F '\t' -v s="$aw_start" -v e="$aw_end" '$2 ~ /^[0-9]+$/ && $2+0 >= s && $2+0 <= e {print}')
-    [ -n "$aw_selected" ] || aw_die "no numbered episodes found in requested range"
+    aw_bulk_episode_rows=$(aw_hianime_episodes "$aw_bulk_slug") || aw_die "could not retrieve episodes"
+    aw_bulk_selected=$(printf '%s\n' "$aw_bulk_episode_rows" | awk -F '\t' -v s="$aw_bulk_start" -v e="$aw_bulk_end" '$2 ~ /^[0-9]+$/ && $2+0 >= s && $2+0 <= e {print}')
+    [ -n "$aw_bulk_selected" ] || aw_die "no numbered episodes found in requested range"
     mkdir -p "$ANIWATCH_DOWNLOAD_DIR" || aw_die "cannot create download directory"
-    aw_downloaded=0
-    while IFS="$(printf '\t')" read -r aw_ep_id aw_ep_no; do
-        [ -n "$aw_ep_id" ] || continue
-        aw_servers=$(aw_hianime_servers "$aw_ep_id") || { aw_info "Skipping episode $aw_ep_no: server lookup failed"; continue; }
-        aw_server=$(printf '%s\n' "$aw_servers" | awk -F '\t' -v mode="$aw_mode" 'tolower($1)==mode && $4 ~ /^https?:\/\// {print; exit}')
-        aw_stream=$(printf '%s\n' "$aw_server" | cut -f 4)
-        if [ -z "$aw_stream" ]; then
-            aw_info "Skipping episode $aw_ep_no: no direct accessible $aw_mode stream URL"
+    aw_bulk_downloaded=0
+    aw_bulk_failed=0
+    aw_bulk_skipped=0
+    while IFS="$(printf '\t')" read -r aw_bulk_ep_id aw_bulk_ep_no; do
+        [ -n "$aw_bulk_ep_id" ] || continue
+        aw_bulk_servers=$(aw_hianime_servers "$aw_bulk_ep_id") || {
+            aw_info "Skipping episode $aw_bulk_ep_no: server lookup failed"
+            aw_bulk_skipped=$((aw_bulk_skipped + 1))
+            continue
+        }
+        aw_bulk_server=$(printf '%s\n' "$aw_bulk_servers" | awk -F '\t' -v mode="$aw_bulk_mode" 'tolower($1)==mode && $4 ~ /^https?:\/\// {print; exit}')
+        aw_bulk_stream=$(printf '%s\n' "$aw_bulk_server" | cut -f 4)
+        if [ -z "$aw_bulk_stream" ]; then
+            aw_info "Skipping episode $aw_bulk_ep_no: no direct accessible $aw_bulk_mode stream URL"
+            aw_bulk_skipped=$((aw_bulk_skipped + 1))
             continue
         fi
-        aw_title="$aw_slug Episode $aw_ep_no"
-        aw_info "Downloading episode $aw_ep_no"
-        case "$aw_stream" in
-            *.m3u8*|*.m3u*) aw_download_hls "$aw_stream" "$aw_quality" "$ANIWATCH_HIANIME_BASE" "$aw_title" ;;
-            *) aw_require yt-dlp; aw_format=$(aw_quality_format "$aw_quality" "$aw_mode"); yt-dlp --no-playlist --referer "$ANIWATCH_HIANIME_BASE" --format "$aw_format" --write-subs --write-auto-subs --sub-langs "en,eng" --embed-subs --output "$ANIWATCH_DOWNLOAD_DIR/%(title).180B [%(id)s].%(ext)s" "$aw_stream" ;;
-        esac || aw_info "Download failed for episode $aw_ep_no"
-        aw_downloaded=$((aw_downloaded + 1))
+        aw_bulk_title="$aw_bulk_slug Episode $aw_bulk_ep_no"
+        aw_info "Downloading episode $aw_bulk_ep_no"
+        if (
+            case "$aw_bulk_stream" in
+                *.m3u8*|*.m3u*) aw_download_hls "$aw_bulk_stream" "$aw_bulk_quality" "$ANIWATCH_HIANIME_BASE" "$aw_bulk_title" "$aw_bulk_mode" ;;
+                *)
+                    aw_require yt-dlp
+                    aw_bulk_format=$(aw_quality_format "$aw_bulk_quality" "$aw_bulk_mode")
+                    if command -v ffmpeg >/dev/null 2>&1; then
+                        yt-dlp --no-playlist --referer "$ANIWATCH_HIANIME_BASE" --format "$aw_bulk_format" --write-subs --write-auto-subs --sub-langs "en,eng" --embed-subs --output "$ANIWATCH_DOWNLOAD_DIR/%(title).180B [%(id)s].%(ext)s" -- "$aw_bulk_stream"
+                    else
+                        aw_info "ffmpeg not found; downloading subtitles without embedding"
+                        yt-dlp --no-playlist --referer "$ANIWATCH_HIANIME_BASE" --format "$aw_bulk_format" --write-subs --write-auto-subs --sub-langs "en,eng" --output "$ANIWATCH_DOWNLOAD_DIR/%(title).180B [%(id)s].%(ext)s" -- "$aw_bulk_stream"
+                    fi
+                    ;;
+            esac
+        ); then
+            aw_bulk_downloaded=$((aw_bulk_downloaded + 1))
+        else
+            aw_info "Download failed for episode $aw_bulk_ep_no"
+            aw_bulk_failed=$((aw_bulk_failed + 1))
+        fi
     done <<EOF
-$aw_selected
+$aw_bulk_selected
 EOF
-    aw_info "Bulk download finished; processed $aw_downloaded accessible episode(s)"
+    aw_info "Bulk download finished: $aw_bulk_downloaded downloaded, $aw_bulk_failed failed, $aw_bulk_skipped skipped"
 }
 
 aw_hls_command() {
