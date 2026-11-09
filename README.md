@@ -1,54 +1,82 @@
-<!-- AniWatch README -->
-
 <div align="center">
 
-  <img src="https://img.shields.io/badge/✦-ANIWATCH-8b5cf6?style=for-the-badge&labelColor=111827" alt="AniWatch" />
+# AniWatch
 
-  <h1>AniWatch</h1>
+**Anime discovery and playback from your terminal.**
 
-  <p><strong>Your anime corner, right in the terminal.</strong></p>
-  <p>Discover anime on HiAnime · Explore episodes · Watch · Download</p>
+Search HiAnime · Browse episodes · Play · Download
 
-  <p>
-    <a href="https://github.com/Kaztral-ar/ani-watch/actions/workflows/ci.yml">
-      <img src="https://github.com/Kaztral-ar/ani-watch/actions/workflows/ci.yml/badge.svg?branch=main" alt="Build status" />
-    </a>
-    <a href="LICENSE">
-      <img src="https://img.shields.io/badge/license-MIT-8b5cf6.svg" alt="MIT License" />
-    </a>
-    <img src="https://img.shields.io/badge/platform-Linux%20%7C%20macOS%20%7C%20Termux-64748b.svg" alt="Supported platforms" />
-  </p>
-
-  <p>
-    <a href="#-features">Features</a> ·
-    <a href="#-installation">Installation</a> ·
-    <a href="#-quick-start">Quick start</a> ·
-    <a href="#-commands">Commands</a> ·
-    <a href="#-configuration">Configuration</a>
-  </p>
+[![CI](https://github.com/Kaztral-ar/ani-watch/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Kaztral-ar/ani-watch/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 </div>
 
 ---
 
-## ✦ Features
+## Features
 
-| | Feature | What it does |
-|:--:|---|---|
-| 🔎 | **HiAnime search** | Find anime directly through HiAnime |
-| 📺 | **Episode browsing** | Browse episodes and inspect available server listings |
-| ▶️ | **Playback** | Open supported media streams with MPV or VLC |
-| ⬇️ | **Downloads** | Download supported media and episode ranges |
-| 🎞️ | **HLS support** | Select available stream quality and play or download accessible playlists |
-| 📚 | **Watch history** | Review your history and continue from a saved entry |
-| 🤝 | **Watch together** | Launch supported streams through Syncplay |
-| ✨ | **Optional extras** | MPV intro/outro skip integration through ani-skip |
+- Search anime and browse episode/server listings on HiAnime
+- Interactive anime, episode and server selection with `fzf`
+- Play supported media with MPV or VLC
+- Download supported media and accessible HLS playlists
+- Choose quality: `best`, `worst`, `360p`, `480p`, `720p`, or `1080p`
+- Select Japanese-audio (`sub`) or English-audio (`dub`) preference
+- Watch history, continue watching, and Syncplay support
+- Optional MPV intro/outro skipping with `ani-skip`
 
----
+## Installation
 
-## ⚡ Quick start
+### 1. Install dependencies
 
-Clone the project and launch AniWatch:
+**Android (Termux)**
+
+```sh
+pkg update
+pkg install git make curl jq fzf yt-dlp mpv
+```
+
+**Ubuntu / Debian**
+
+```sh
+sudo apt update
+sudo apt install git make curl jq fzf yt-dlp mpv
+```
+
+**macOS (Homebrew)**
+
+```sh
+brew install git make curl jq fzf yt-dlp mpv
+```
+
+VLC can be used instead of MPV. Install `ffmpeg` for HLS fallback/remux and subtitle embedding. `syncplay` and `ani-skip` are optional.
+
+### 2. Install AniWatch
+
+```sh
+git clone https://github.com/Kaztral-ar/ani-watch.git
+cd ani-watch
+make install PREFIX="$HOME/.local"
+```
+
+Make sure `$HOME/.local/bin` is in your `PATH`. Then run:
+
+```sh
+aniwatch
+```
+
+To install system-wide instead:
+
+```sh
+sudo make install
+```
+
+To uninstall:
+
+```sh
+make uninstall PREFIX="$HOME/.local"
+```
+
+### Run without installing
 
 ```sh
 git clone https://github.com/Kaztral-ar/ani-watch.git
@@ -56,175 +84,123 @@ cd ani-watch
 ./bin/aniwatch
 ```
 
-Open the interactive interface and search for your anime on HiAnime.
+## Usage
 
-### Install as a system command (optional)
+### Interactive mode
 
-The install target builds a self-contained executable before installing it:
-
-```sh
-make install PREFIX="$HOME/.local"
-```
-
-Ensure `$HOME/.local/bin` is on your `PATH`. To uninstall:
+Start AniWatch and follow the prompts to search for an anime, select an episode, and choose a listed server:
 
 ```sh
-make uninstall PREFIX="$HOME/.local"
+aniwatch
 ```
 
----
-
-## 📦 Installation
-
-Install the required tools for your platform, then clone the repository using the quick-start steps above.
-
-<details>
-<summary><strong>Android · Termux</strong></summary>
+### Search and browse
 
 ```sh
-pkg update
-pkg install git curl jq fzf yt-dlp mpv
+# Search HiAnime
+aniwatch search "Frieren"
+
+# List episodes for an anime slug
+aniwatch episodes <anime-slug>
+
+# List available server entries for an episode ID
+aniwatch servers <episode-id>
 ```
 
-</details>
-
-<details>
-<summary><strong>Ubuntu / Debian</strong></summary>
-
-```sh
-sudo apt update
-sudo apt install git curl jq fzf yt-dlp mpv
-```
-
-</details>
-
-<details>
-<summary><strong>macOS · Homebrew</strong></summary>
-
-```sh
-brew install git curl jq fzf yt-dlp mpv
-```
-
-</details>
-
-**Player:** MPV is used by default. VLC is supported as an alternative.
-
-**Optional tools:** `ffmpeg`, `syncplay`, and `ani-skip` are only needed for their respective optional features.
-
----
-
-## 🎬 Quick start
-
-### Search and browse on HiAnime
-
-```sh
-# Search for an anime
-./bin/aniwatch search "Frieren"
-
-# Browse episodes for a result
-./bin/aniwatch episodes <anime-slug>
-
-# Inspect available servers for an episode
-./bin/aniwatch servers <episode-id>
-```
-
----
-
-## ⌨️ Commands
-
-<details open>
-<summary><strong>Playback and downloads</strong></summary>
+### Play and download
 
 ```sh
 # Play a supported media URL
-./bin/aniwatch watch "<media-url>" 1080p sub
+aniwatch watch "<media-url>" 1080p sub
 
 # Download a supported media URL
-./bin/aniwatch download "<media-url>" 720p dub
+aniwatch download "<media-url>" 720p dub
 
 # Play an accessible HLS playlist
-./bin/aniwatch hls "<playlist.m3u8>" 720p
+aniwatch hls "<playlist.m3u8>" 720p
 
 # Download an accessible HLS playlist
-./bin/aniwatch hls-download "<playlist.m3u8>" best
+aniwatch hls-download "<playlist.m3u8>" best
 
-# Download an episode range when direct stream URLs are available
-./bin/aniwatch bulk-download <anime-slug> 1-12 sub 720p
+# Download episodes 1–12 when direct stream URLs are available
+aniwatch bulk-download <anime-slug> 1-12 sub 720p
 ```
 
-</details>
-
-<details>
-<summary><strong>History and Syncplay</strong></summary>
+### History and watch together
 
 ```sh
-# View watch history
-./bin/aniwatch history
-
-# Continue from saved history
-./bin/aniwatch continue
-
-# Clear watch history
-./bin/aniwatch history-clear
-
-# Start a synchronized session
-./bin/aniwatch syncplay "<media-url>"
+aniwatch history
+aniwatch continue
+aniwatch history-clear
+aniwatch syncplay "<media-url>"
 ```
 
-</details>
+### Metadata discovery
 
-<details>
-<summary><strong>Help</strong></summary>
+AniWatch also provides anime metadata through Jikan:
 
 ```sh
-./bin/aniwatch help
+aniwatch metadata-search "Frieren"
+aniwatch top
+aniwatch random
+aniwatch season 2026 fall
+aniwatch info <mal-id>
 ```
 
-</details>
-
----
-
-## ⚙️ Configuration
-
-### Use VLC
-
-Switch from the default MPV player:
+### Help
 
 ```sh
-ANIWATCH_PLAYER=vlc ./bin/aniwatch
+aniwatch help
+aniwatch version
 ```
 
-### Enable intro/outro skip
+## Configuration
 
-If `ani-skip` is installed, enable its integration for MPV:
+Set environment variables before launching AniWatch.
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `ANIWATCH_PLAYER` | `mpv` | Playback program: `mpv` or `vlc` |
+| `ANIWATCH_QUALITY` | `best` | Default playback/download quality |
+| `ANIWATCH_MODE` | `sub` | Audio preference: `sub` or `dub` |
+| `ANIWATCH_SKIP_INTRO` | `0` | Set to `1` to enable MPV Ani-Skip integration |
+| `ANIWATCH_DOWNLOAD_DIR` | `.` | Download destination |
+| `ANIWATCH_STATE_DIR` | `~/.local/state/aniwatch` | History and state directory |
+| `ANIWATCH_HIANIME_BASE` | `https://hianime.at` | HiAnime base URL |
+| `ANIWATCH_API_URL` | `https://api.jikan.moe/v4` | Jikan API base URL |
+
+Examples:
 
 ```sh
-ANIWATCH_SKIP_INTRO=1 ./bin/aniwatch
+ANIWATCH_PLAYER=vlc aniwatch
+ANIWATCH_QUALITY=720p ANIWATCH_MODE=dub aniwatch
+ANIWATCH_SKIP_INTRO=1 aniwatch
+ANIWATCH_DOWNLOAD_DIR="$HOME/Videos/Anime" aniwatch
 ```
 
----
+## Notes and limitations
 
-## ℹ️ Important notes
+- Playback requires a direct media URL or an HLS playlist that the installed player or `yt-dlp` can access.
+- A server appearing in the HiAnime listing does not guarantee that it exposes a playable URL.
+- Opaque embed IDs and protected/obfuscated stream sources are not resolved. AniWatch does not bypass DRM or access controls.
+- HiAnime is an unofficial provider integration; its website structure and endpoints may change without notice.
+- Use the service and media sources in accordance with applicable laws and provider terms.
 
-- AniWatch uses **HiAnime** for anime search, episode browsing, and server listings.
-- Playback supports **direct media URLs** and **accessible HLS playlists**.
-- A server shown in a listing is not guaranteed to provide a directly playable stream.
-- Opaque embed identifiers that require protected or obfuscated resolution are not decoded.
-- Provider endpoints and website structures can change, which may temporarily affect search or server listings.
-- AniWatch does not bypass DRM or other access controls.
+## Development
+
+Run the regression tests and build the standalone executable:
+
+```sh
+make test
+make build
+```
+
+The CI workflow checks POSIX shell syntax, ShellCheck, tests under `sh`, `dash`, and BusyBox `ash`, and the standalone build.
 
 ---
 
 <div align="center">
 
-  **Enjoy your next episode. 🍿**
-
-  If AniWatch is useful, consider giving the project a ⭐
-
-  <a href="https://github.com/Kaztral-ar/ani-watch">GitHub Repository</a>
-  ·
-  <a href="https://github.com/Kaztral-ar/ani-watch/issues">Report a bug</a>
-  ·
-  <a href="LICENSE">MIT License</a>
+MIT License · [Report an issue](https://github.com/Kaztral-ar/ani-watch/issues) · [Source](https://github.com/Kaztral-ar/ani-watch)
 
 </div>
