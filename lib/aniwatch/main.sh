@@ -68,7 +68,7 @@ aw_play_selected_episode() {
     [ -n "$aw_stream" ] || aw_die "server $aw_server_name exposes only an opaque ID; no direct accessible stream URL is available"
     aw_media_title="$aw_title Episode $aw_ep_no"
     case "$aw_stream" in
-        *.m3u8*|*.m3u*) aw_play_hls "$aw_stream" "$ANIWATCH_QUALITY" "$ANIWATCH_HIANIME_BASE" "$aw_media_title" "$aw_slug" "$aw_ep_no" "$aw_mal_id" ;;
+        *.m3u8*|*.m3u*) aw_play_hls "$aw_stream" "$ANIWATCH_QUALITY" "$ANIWATCH_HIANIME_BASE" "$aw_media_title" "$aw_slug" "$aw_ep_no" "$aw_mal_id" "$aw_mode" ;;
         *) aw_play_url "$aw_stream" "$ANIWATCH_QUALITY" "$aw_mode" "$aw_media_title" "$aw_mal_id" "$aw_ep_no" "$ANIWATCH_HIANIME_BASE" ;;
     esac
 }
