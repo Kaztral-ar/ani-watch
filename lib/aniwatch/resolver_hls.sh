@@ -131,7 +131,7 @@ aw_play_hls() {
         *) aw_die "ANIWATCH_PLAYER must be mpv or vlc" ;;
     esac
     if [ "$aw_hls_play_status" -eq 0 ]; then
-        aw_history_add "$aw_hls_play_manifest" "$aw_hls_play_title" "$aw_hls_play_mal_id" "$aw_hls_play_episode" "$aw_hls_play_referer"
+        aw_history_add "$aw_hls_play_manifest" "$aw_hls_play_title" "$aw_hls_play_mal_id" "$aw_hls_play_episode" "$aw_hls_play_referer" "$aw_hls_play_mode"
     fi
     return "$aw_hls_play_status"
 }
