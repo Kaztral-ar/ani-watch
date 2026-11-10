@@ -1,5 +1,4 @@
 User-agent: *
 Allow: /
-Disallow: /anime.html
 
 Sitemap: https://kaztral-ar.github.io/ani-watch/sitemap.xml
